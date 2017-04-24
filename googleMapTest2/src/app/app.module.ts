@@ -8,13 +8,14 @@ import {RoutingModule} from './route-module/routing.module';
 import { AppComponent } from './app.component';
 import { GoogleMapComponentComponent } from './google-map-component/google-map-component.component';
 import {BuildingComponent} from './building-component/building-component.component';
+import { NewShapesComponent } from './new-shapes/new-shapes.component';
+import { RootComponent } from './root.component';
 
 import { BuildingService } from './building.service';
 import { GMapService } from './gmap-service.service';
 import { SiteService } from './service-site.service';
-import { NewShapesComponent } from './new-shapes/new-shapes.component';
-import { RootComponent } from './root.component';
-
+import { FloorService } from './floor.service';
+import { SpaceService } from './space.service';
 
 
 
@@ -29,7 +30,7 @@ import { RootComponent } from './root.component';
 	RoutingModule
 	
   ],
-  providers: [GMapService,SiteService,BuildingService],
+  providers: [GMapService,SiteService,BuildingService,SpaceService,],
   bootstrap: [RootComponent]
 })
 export class AppModule { }
