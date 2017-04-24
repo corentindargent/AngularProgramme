@@ -1,0 +1,15 @@
+tester t ng show pour l'affichage de message erreur
+	
+	-> http://code.realcrowd.com/on-the-bleeding-edge-advanced-angularjs-form-validation/
+	+> https://docs.angularjs.org/api/ng/directive/ngShow
+
+	installer bootstrap sur angualr 
+		-> https://angular-ui.github.io/bootstrap/
+		
+		
+		
+Dnsa la methode polygonComplete (function listner event polygoncomplete google mpas)
+	-> voir comment attineder removeDrawingManager() de l'appcomponet
+	
+	MODIFICATION D4UN SITE PERMETTRE DE SELCETIONNER POLYGONES SUR LA CARTE
+		-> mettra a jour le selectedSite et le formualire modif
