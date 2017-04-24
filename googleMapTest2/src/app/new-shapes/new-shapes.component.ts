@@ -1,6 +1,8 @@
 import {Component,OnInit,ViewChild,ElementRef,AfterViewChecked,Input,AfterContentChecked } from '@angular/core';
+
 import { GMapService } from '../gmap-service.service';
 import { SiteService} from '../service-site.service';
+import { BuildingService } from '../building.service';
 
 import { Site,ISite,Building} from '../model';
 
@@ -75,7 +77,7 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 	
 	
 	
-    constructor(private gmapService: GMapService, private siteService: SiteService) { }
+    constructor(private gmapService: GMapService, private siteService: SiteService, private buildingService: BuildingService) { }
     yop(){console.log("Tu veux un yop");}
 	
 	ngOnInit(){	
@@ -206,7 +208,7 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 				this.newBuilding.polygon = NewShapesComponent.polygon.getPath().getArray();
 						
 				/*APPEL SERVICE CREATION BUILDING*/
-					this.siteService.addBuilding(this.newBuilding).subscribe(
+					this.buildingService.addBuilding(this.newBuilding).subscribe(
 						building => {console.log('create result received:');console.log(building);},
 						(err:any) => console.error(err) 
 					);
@@ -387,7 +389,7 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		this.building_list[this.lastSelected].polygon = this.listePolygonBatiment[this.lastSelected].getPath().getArray();
 		
 		
-		this.siteService.updateBuilding(this.building_list[this.lastSelected]).subscribe(
+		this.buildingService.updateBuilding(this.building_list[this.lastSelected]).subscribe(
 						site => {console.log('create result received:');},
 						(err:any) => console.error(err) 
 		);

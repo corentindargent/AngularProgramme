@@ -96,7 +96,7 @@
 			
 			<ul class="nav navbar-nav">
 			
-								
+			  <li>	<a [routerLink]="['/newPolygon']">Nouveau polygon</a></li>				
 			  <li><a href="#" id="newSite" [ngClass]="{'disabled':isOneSite}"  (click)="addPolygons(true);">Nouveau site</a></li>
 			  <li class="active"><a href="#">Home</a></li>
 			  <li class="dropdown">
@@ -151,11 +151,8 @@
 									</ul>							
 							</li>
 						</ul>
-					</div><!-- form batiment-->
+					</div><!-- form batiment-->				
 				
-					
-				
-				<router-outlet></router-outlet>
 				
 				
 			</div>

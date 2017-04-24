@@ -53,6 +53,7 @@ export class Building  {
 	orientation : number;
 	polygon: Array<any>;
 	site_id : number;
+	listFloor : Array<Floor>;
 	
 	constructor() 
 	{  
@@ -63,49 +64,105 @@ export class Building  {
 		this.altitude =  -1;
 		this.polygon =  null;
 		this.site_id =  -1;	
+		this.listFloor = null;
 	}
 }
 
 
+
 export class Floor   {
-  constructor(
-	public Floor_id  : number, 
-	public reference: string,    
-	public Order_Number   : number,
-	public X  : number,
-	public Y    : number,
-	public Z : number,
-    public polygon: Array<number>,
-	public Building_id  : number
-	) {  }
+	
+	reference : string;
+	y : number;
+	x : number;
+	z : number;
+	order_number : number;
+	id_building : number;
+	polygon: Array<any>;
+	id_floor : number;
+	listSpaces : Array<Space>;
+	
+  constructor() 
+  {  
+	this.reference = "";
+	this.y = -1;
+	this.x = -1;
+	this.z = -1;
+	this.order_number = -1;
+	this.id_building = -1;
+	this.polygon = null;
+	this.id_floor = -1;  
+	this.listSpaces = null;
+  }
 }
 
 
+
+
 export class Space    {
-  constructor(
-	public Space_id   : number, 
-	public reference: string,    
-	public X  : number,
-	public Y    : number,
-	public Z : number,
-    public polygon: Array<number>,
-	public Floor_id  : number
-	) {  }
+	
+	reference : string;
+	y : number;
+	x : number;
+	z : number;
+	id_floor : number;
+	polygon: Array<any>;
+	id_space : number;
+	listReaders : Array<Reader>;
+	tabObjects : Array <Object>;
+	
+  constructor() 
+  { 
+	this.reference = "";
+	this.y = -1;
+	this.x = -1;
+	this.z = -1;
+	this.id_floor = -1;
+	this.polygon = null;
+	this.id_space = -1;
+	this.listReaders = null;  
+    this.tabObjects	 = null;
+  }
 }
 
 
 export class Reader     {
-  constructor(
-	public Reader_id    : number, 
-	public reference: string, 
-    public Mac : string,	
-	public X  : number,
-	public Y    : number,
-	public Z : number,
-    public Fixed : boolean,
-	public Space_id   : number,
-	public Last_Data_Event_Id : number,
-	) {  }
+	
+	 id_reader: number;
+	 reference: string;
+     mac : string;
+	 y : number;
+	 x : number;
+	 z : number;
+     fixed : boolean;
+	 id_space   : number;
+	 Last_Data_Event_Id : number;
+	
+  constructor() 
+  { 
+    this.reference = "";
+	this.y = -1;
+	this.x = -1;
+	this.z = -1;
+	this.fixed = null;
+	this.mac = "";
+	this.id_space = -1;
+	this.id_reader = -1; 
+    this.Last_Data_Event_Id = null; 	
+  }
+}
+
+
+export class Object {
+
+  id_object : number;
+  reference : string;
+  
+  constructor()
+  {
+	 this.id_object = -1;
+	 this.reference = ""; 	  
+  }   
 }
 
 
@@ -124,17 +181,6 @@ export class Tag      {
 	) {
   }
 }
-
-
-export class Object {
-
-  constructor(
-    public Object_id: number,
-    public reference: string){}   
-}
-
-
-
 
 export interface IBuilding
 {
