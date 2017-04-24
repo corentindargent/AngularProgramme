@@ -1,26 +1,24 @@
-import { Component,OnInit,ViewChild,ElementRef,AfterViewChecked,Input,AfterContentChecked } from '@angular/core';
-import { GMapService } from './gmap-service.service';
-import { SiteService} from './service-site.service';
+import {Component,OnInit,ViewChild,ElementRef,AfterViewChecked,Input,AfterContentChecked } from '@angular/core';
+import { GMapService } from '../gmap-service.service';
+import { SiteService} from '../service-site.service';
 
-import { Site,ISite,Building} from './model';
+import { Site,ISite,Building} from '../model';
 
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
-  providers: []
+  selector: 'app-new-shapes',
+  templateUrl: './new-shapes.component.html',
+  styleUrls: ['./new-shapes.component.css']
 })
+export class NewShapesComponent implements OnInit,AfterContentChecked{
 
-export class AppComponent implements OnInit,AfterContentChecked  {
-	
-	@Input() newSite : Site;
+  @Input() newSite : Site;
 	@Input() newBuilding : Building;
 	siteListes:Array<ISite>; //var de teset certainemtn a bouger
-	public map: google.maps.Map;
 	
 	
-	selectedSite : number;
+	
+	
 	
 	building_list : Array<Building>;
 	sites_list : Array<Site>;	
@@ -105,9 +103,7 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 			console.log("after content init");
 			
 			if(this.sites_list)
-			{	
-				this.map = this.gmapService.map;//get refrence de la map; pour pouvoir cahcer ou affiche les polygons sur la map
-				
+			{		 
 		        /*PEUT PAS UTILISER DIRECTEMENT LES VARIABLES DEFINIES DANS ANGULAR DOIT PASSER PAR DES ARRAY INTERMETIAIRE*/
 				var tabPolygonSite = new Array(); 
 				var tabPolygonBuilding = new Array(); 
@@ -115,9 +111,10 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 				
 				for(let i = 0; i < this.sites_list.length ;i++)
 				{
-					var site = new google.maps.Polygon(AppComponent.listOptionsPolygonsSite);		
+					var site = new google.maps.Polygon(NewShapesComponent.listOptionsPolygonsSite);		
 					var path  = this.sites_list[i].polygon;
 					site.setPath(path); 
+					site.setMap(this.gmapService.map);					
 					tabPolygonSite.push(site);
 					
 					if(this.sites_list[i].listBuidling[0])//si site possede un building
@@ -125,9 +122,10 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 						
 						for(let index = 0 ; index < this.sites_list[i].listBuidling.length ; index++)
 						{
-							var batiment = new google.maps.Polygon(AppComponent.listOptionsPolygonsBuilding);		
+							var batiment = new google.maps.Polygon(NewShapesComponent.listOptionsPolygonsBuilding);		
 							var path  = this.sites_list[i].listBuidling[index].polygon;
-							batiment.setPath(path); 							
+							batiment.setPath(path); 
+							batiment.setMap(this.gmapService.map);
 							tabPolygonBuilding.push(batiment);
 							
 							buildingList.push(this.sites_list[i].listBuidling[index]);
@@ -159,21 +157,7 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 		//desisner
 	}
 	
-	selectView(i : number){
-		console.log(i);
-		if(this.lastSelected == null)
-		{
-			console.log("pas enceore de cselcetionner");
-		}
-		else
-		{
-			console.log("Last"+this.lastSelected);
-			this.listePolygon[this.lastSelected].setMap(null);		
-		}
-		
-		this.lastSelected = i;
-		this.listePolygon[this.lastSelected].setMap(this.map);
-	}
+	
 	
 	resetHTML(){
 		this.isNewSite=false;
@@ -182,8 +166,8 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 	
 	addPolygons(bool: boolean){//init processus creation site/batiment		
 		
-		AppComponent.polygon = null;//set à null
-		AppComponent.isASite = bool; // var permettant d'associer au ploygone creer les options du site / batiment
+		NewShapesComponent.polygon = null;//set à null
+		NewShapesComponent.isASite = bool; // var permettant d'associer au ploygone creer les options du site / batiment
 		if(bool)//creation site
 		{
 			this.newSite = new Site();
@@ -211,7 +195,7 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 	addNewBuilding(){
 		console.log(this.newBuilding.site_id);
 		if(this.newBuilding.site_id != -1){
-			if(!AppComponent.polygon)
+			if(!NewShapesComponent.polygon)
 			{
 				this.errorMessage = "Trace du polygone obligatoire";			
 			}
@@ -219,7 +203,7 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 				
 				this.errorMessage = "";		
 				console.log(this.newBuilding.site_id);
-				this.newBuilding.polygon = AppComponent.polygon.getPath().getArray();
+				this.newBuilding.polygon = NewShapesComponent.polygon.getPath().getArray();
 						
 				/*APPEL SERVICE CREATION BUILDING*/
 					this.siteService.addBuilding(this.newBuilding).subscribe(
@@ -239,14 +223,14 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 	
 	addNewSite(){
 		
-		if(!AppComponent.polygon)
+		if(!NewShapesComponent.polygon)
 		{
 			this.errorMessage = "Trace du polygone obligatoire";			
 		}
 		else{			
 			this.errorMessage = "";			
 			
-		    this.newSite.polygon = AppComponent.polygon.getPath().getArray();	
+		    this.newSite.polygon = NewShapesComponent.polygon.getPath().getArray();	
 				
 				/*APPEL SERVICE CREATION BUILDING*/
 					this.siteService.addSite(this.newSite).subscribe(
@@ -267,7 +251,7 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 	
 	polygonCompleteEvent(newPolygon){		 
 		  
-	    if(AppComponent.polygon){
+	    if(NewShapesComponent.polygon){
 			
 			newPolygon.setMap(null);
 			
@@ -278,18 +262,18 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 			{
 				console.log("Forme Confirmée");
 				
-				AppComponent.polygon = newPolygon;
+				NewShapesComponent.polygon = newPolygon;
 				/*console.log("Nw polygon "+newPolygon);				
 				console.log(newPolygon);				
-				console.log("AppComponent "+AppComponent.polygon);	
-				console.log(AppComponent.polygon);*/
-				if(AppComponent.isASite)
+				console.log("NewShapesComponent "+NewShapesComponent.polygon);	
+				console.log(NewShapesComponent.polygon);*/
+				if(NewShapesComponent.isASite)
 				{
-					newPolygon.setOptions(AppComponent.listOptionsPolygonsSite);					
+					newPolygon.setOptions(NewShapesComponent.listOptionsPolygonsSite);					
 				}
 				else
 				{
-					newPolygon.setOptions(AppComponent.listOptionsPolygonsBuilding);
+					newPolygon.setOptions(NewShapesComponent.listOptionsPolygonsBuilding);
 				}				
 					
 					//retire option de dessin
@@ -299,8 +283,8 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 			{
 				console.log("supp");
 				newPolygon.setMap(null);
-				//set AppComponent.polygon qd ajout effectue ou 
-				AppComponent.polygon=null;
+				//set NewShapesComponent.polygon qd ajout effectue ou 
+				NewShapesComponent.polygon=null;
 				
 				//*peut etre autre cinfrim box -> si oui continue edtion du polygone, si non retourne page accueil */
 				alert("Vous pouvez redessiner la forme");
@@ -409,6 +393,5 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 		);
 		
 	}
-	
-    
+
 }

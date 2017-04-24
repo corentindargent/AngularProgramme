@@ -96,10 +96,6 @@
 			
 			<ul class="nav navbar-nav">
 			
-			  				  <li><a href="#"   (click)="addPolygons(false);">Nouveau batiment</a></li>
-								<li><a href="#"   (click)="modificationSite();">Modif site</a></li>
-								
-								<li><a href="#"   (click)="modificationBuilding();">Modif Building</a></li>
 								
 			  <li><a href="#" id="newSite" [ngClass]="{'disabled':isOneSite}"  (click)="addPolygons(true);">Nouveau site</a></li>
 			  <li class="active"><a href="#">Home</a></li>
@@ -142,149 +138,24 @@
 			
 		   <div class="col-lg-3 col-lg-offset-1">
 			
-				<!--CREATION NEW SITE-->
-					<div *ngIf="isNewSite" >
-						<h1 [ngStyle]="{'color':'red'}" >Nouveau Site</h1>
-						<form #form="ngForm" id="formulaire"  class="simple-form" >
-						
-						  <div class="form-group">
-							<label for="nom">Reference:</label>
-							<input #name="ngModel" type="text" class="form-control"  id="nom"
-								[(ngModel)] = "newSite.reference" name="address"	name="nomSite"	
-								required />
-								
-							<p *ngIf="name.control.hasError('required')&& (name.touched)"
-							class="alert alert-danger validation-message">Référence requise</p>
-							
-						  </div> <!--/input Nom -->
-						  
-						  <div class="form-group">
-							<label for="adressePostal">Adresse postal:</label>
-							<input #adresse="ngModel" type="text" class="form-control required" id="adressePostal" required
-							[(ngModel)] = "newSite.address" name="address" placeholder="ex: Edouard Belin,50b"/>
-						  
-							<p *ngIf="adresse.control.hasError('required') && (adresse.touched)"
-							class="alert alert-danger validation-message">Adresse requise</p>
-							
-						  </div><!--/input adresse -->
-						  
-						  <div class="form-group">
-							<label for="landTittleNumber">Numéro du Site au registre Régional:</label>
-							<input #land_number="ngModel" type="text" class="form-control" id="landTittleNumber" required
-							[(ngModel)] = "newSite.land_number" name="landNumber" placeholder="ex: 001848"/>
-							
-							<p *ngIf="land_number.control.hasError('required') && (land_number.touched)"
-							class="alert alert-danger validation-message">Adresse requise</p>
-							
-						 </div><!--/input landNumber -->
-						  
-						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
-						  <button id="send" type="submit" (click)="addNewSite()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
-						</form>
-					</div><!-- form site-->	
-				<!--/fin CREATION NEW SITE-->	
-				
-				<!--CREATION NEW BUILDING-->	
-					<div *ngIf="isNewBuilding" >
-						<h1 [ngStyle]="{'color':'red'}" >Nouveau Batiment</h1>
-						<form   #formBuilding="ngForm" id="formulaire"  class="simple-form" >
-						
-						  <div class="form-group">
-							<label for="nom">Reference:</label>
-							<input #name="ngModel" type="text" class="form-control"  id="nom"
-								[(ngModel)] = "newBuilding.reference" name="address"	name="nomSite"	
-								required />
-								
-							<p *ngIf="name.control.hasError('required')&& (name.touched)"
-							class="alert alert-danger validation-message">Référence requise</p>
-							
-						  </div> <!--/input Reference -->
-						  
-						  <div class="form-group"><!-- select-->
-							<label for="site_id"> Site: </label>
-							<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="newBuilding.site_id" >
-								<option *ngFor="let site of sites_list"
-								[value]="site.site_id">Site : {{site.site_id }}</option>							
-							</select>
-							<!-- <p *ngIf="selectSite.control.hasError('required')"
-							class="alert alert-danger validation-message">Veuillez selectionner un Site</p> -->
-						  </div><!-- /select-->
-						  
-						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}</div>			  
-						  <button id="send" type="submit" (click)="addNewBuilding()"  class="btn btn-default" [disabled]="formBuilding.invalid" >Submit</button>					
-						</form>	
-					</div><!-- form batiment-->
-					
-				<!--/fin CREATION NEW BUILDING-->
-				
-				
-				<!--MODIFICATION SITE-->
+			<!--MODIFICATION SITE-->
 
-					<div *ngIf="modifSite" >
-						<h1 [ngStyle]="{'color':'red'}" >Modification Site</h1>
-
-						<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="selectedPolygon" >
-								<option *ngFor="let site of sites_list; let i = index"
-								[value]="i" (click)="onSelectSite(i)" >Site : {{site.site_id }}</option>							
-						</select>
-							<br/>
-						<form   #formBuilding="ngForm" id="formulaire"  class="simple-form" >
-						
-						  <div class="form-group">
-							<label for="nom">Reference:</label>
-							<input #name="ngModel" type="text" class="form-control"  id="nom"
-								[(ngModel)] = "sites_list[selectedPolygon].reference" name="address"	name="nomSite"	
-								required />
-								
-							<p *ngIf="name.control.hasError('required')&& (name.touched)"
-							class="alert alert-danger validation-message">Référence requise</p>
-							
-						  </div> <!--/input Reference -->
-						  
-						  
-						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}</div>			  
-						  <button id="send" type="submit" (click)="modificationSiteConfirme()"  class="btn btn-default" [disabled]="formBuilding.invalid" >Submit</button>					
-						</form>	
+					<div>
+						<h1 [ngStyle]="{'color':'red'}" >SITES</h1>
+						<ul>
+							<li *ngFor="let site of sites_list; let i = index" (click)="selectView(i)">							
+									Site : {{site.reference }} 
+									<ul *ngFor="let build of site.listBuidling; let i = index" >
+										<a [routerLink]="['/building', build.building_id]"><li> {{build.reference}} </li></a> 
+										
+									</ul>							
+							</li>
+						</ul>
 					</div><!-- form batiment-->
 				
 					
 				
-				<!--/MODIFICATION SITE-->
-				
-				
-				<!--MODIFICATION BUILDING-->
-
-					<div *ngIf="modifBuilding" >
-						<h1 [ngStyle]="{'color':'red'}" >Modification Batiment</h1>
-
-						<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="selectedPolygon" >
-								<option *ngFor="let build of building_list; let i = index"
-								[value]="i" (click)="onSelectBuilding(i)" >Site : {{build.site_id }}</option>							
-						</select>
-							<br/>
-						<form   #formBuilding="ngForm" id="formulaire"  class="simple-form" >
-						
-						  <div class="form-group">
-							<label for="nom">Reference:</label>
-							<input #name="ngModel" type="text" class="form-control"  id="nom"
-								[(ngModel)] = "building_list[selectedPolygon].reference" name="address"	name="nomSite"	
-								required />
-								
-							<p *ngIf="name.control.hasError('required')&& (name.touched)"
-							class="alert alert-danger validation-message">Référence requise</p>
-							
-						  </div> <!--/input Reference -->
-						  
-						  
-						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}</div>			  
-						  <button id="send" type="submit" (click)="modificationBuildConfirme()"  class="btn btn-default" [disabled]="formBuilding.invalid" >Submit</button>					
-						</form>	
-					</div><!-- form batiment-->
-				
-					
-				
-				<!--/MODIFICATION BUILDING-->
-				
+				<router-outlet></router-outlet>
 				
 				
 			</div>

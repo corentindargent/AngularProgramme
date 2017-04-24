@@ -1,0 +1,305 @@
+<head>
+	<meta charset="UTF-8" />
+   <!-- CSS -->
+		<style type="text/css">
+		 
+		 table{ margin:auto; border-collapse: collapse; }
+		
+		  caption{font-family: Verdana, sans-serif;font-size: xx-large; font-style:bold;}
+		 
+		  #header{background-color: #9F9395; padding : 5px;}
+		  th, tr{font-family: Verdana, sans-serif;font-size: large; font-style:bold;}
+		  td, th {
+			border: thin solid #6495ed;
+			width: 50%;	}
+			
+			#confirmBtn{
+				visibility:hidden;
+			}
+			
+			.map_canvas {
+			  
+			  border: 1px solid black;
+			}
+		 
+		 /* Styles de base */
+      body {
+        font-family: 'Bitter', serif;
+       <!-- background-color: #eef;
+         color: #259; -->
+      }
+      nav img {
+        width: 100%;
+      }
+
+      /* Styles pour les smartphones */
+      #left, #side1, #side2 {
+        padding: 10px 10px 0 10px;
+      }
+
+      /* Styles pour les tablettes */
+      @media (min-width: 768px) {
+        #left{
+          padding: 0;
+        } 
+        #side1 {
+          padding: 10px 5px 0 0;
+        } 
+        #side2 {
+          padding: 10px 0 0 5px;
+        }
+      }
+
+      /* Styles pour les écrans moyens et grands */
+      @media (min-width: 992px) {
+        #side1, #side2 {
+          padding: 0 0 10px 10px;
+        } 
+      }
+	  
+	  .btn-rond {
+  width: 50px;
+  height: 50px;
+  border-radius: 25px;
+}
+
+.jumbotron-marge{
+	margin-right:10px;
+}
+
+
+.disabled {
+   pointer-events: none;
+   cursor: default;
+}
+
+			
+		</style>
+		
+		<link href="/css/bootstrap.min.css" rel="stylesheet">
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+	
+	<!-- JS -->
+	
+	<script src="/js/jquery.js"></script>
+	<script src="/js/bootstrap.min.js"></script>	
+	<script src="//d3js.org/d3.v3.min.js"></script>	
+  </head>  
+  
+  <body>
+
+  <nav class="navbar navbar-inverse">
+		  <div class="container-fluid">
+			<div class="navbar-header">
+			  <a class="navbar-brand" href="#">WebSiteName</a>
+			</div><!--/navBar header-->
+			
+			<ul class="nav navbar-nav">
+			
+			  				  <li><a href="#"   (click)="addPolygons(false);">Nouveau batiment</a></li>
+								<li><a href="#"   (click)="modificationSite();">Modif site</a></li>
+								
+								<li><a href="#"   (click)="modificationBuilding();">Modif Building</a></li>
+								
+			  <li><a href="#" id="newSite" [ngClass]="{'disabled':isOneSite}"  (click)="addPolygons(true);">Nouveau site</a></li>
+			  <li class="active"><a href="#">Home</a></li>
+			  <li class="dropdown">
+				<a class="dropdown-toggle" data-toggle="dropdown" href="#">Nouvelle forme
+				<span class="caret"></span></a>
+				<ul class="dropdown-menu">
+				  <li><a href="#" id="newSite">Nouveau site</a></li>
+				  <li><a href="#" [ngClass]="{'disabled':isOneSite}"  (click)="addPolygons(false);">Nouveau batiment</a></li>
+				  <li><a href="#">Page 1-3</a></li>
+				</ul>
+			  </li>
+			  <li class="dropdown">
+				<a class="dropdown-toggle" data-toggle="dropdown" href="#">Modification
+				<span class="caret"></span></a>
+				<ul class="dropdown-menu">
+				  <li><a href="#" onclick="modificationSite();">Modification site</a></li>
+				  <li><a href="#" onclick="modificationBuilding();">Modification batiment</a></li>				  
+				</ul>
+			  </li>
+			  
+			  <li><a href="#">Page 2</a></li>
+			  <li><a href="#">Page 3</a></li>
+			  
+			</ul><!--/navbar-nav-->
+			
+		  </div><!--/container-->
+	</nav>
+	
+	<div class="container-fluid">		
+		<div class="row">
+		
+			<div id="left" class="col-lg-7 col-lg-offset-1 ">			
+				<div class="map_canvas">
+					<google-map-component></google-map-component>
+				</div>				
+			</div>
+			
+			<!-- FORMUALIRE AJOUT/MODIF D'1 SITE/BUILDING -->	
+			
+		   <div class="col-lg-3 col-lg-offset-1">
+			
+			
+				<!--CREATION NEW SITE-->
+					<div *ngIf="isNewSite" >
+						<h1 [ngStyle]="{'color':'red'}" >Nouveau Site</h1>
+						<form #form="ngForm" id="formulaire"  class="simple-form" >
+						
+						  <div class="form-group">
+							<label for="nom">Reference:</label>
+							<input #name="ngModel" type="text" class="form-control"  id="nom"
+								[(ngModel)] = "newSite.reference" name="address"	name="nomSite"	
+								required />
+								
+							<p *ngIf="name.control.hasError('required')&& (name.touched)"
+							class="alert alert-danger validation-message">Référence requise</p>
+							
+						  </div> <!--/input Nom -->
+						  
+						  <div class="form-group">
+							<label for="adressePostal">Adresse postal:</label>
+							<input #adresse="ngModel" type="text" class="form-control required" id="adressePostal" required
+							[(ngModel)] = "newSite.address" name="address" placeholder="ex: Edouard Belin,50b"/>
+						  
+							<p *ngIf="adresse.control.hasError('required') && (adresse.touched)"
+							class="alert alert-danger validation-message">Adresse requise</p>
+							
+						  </div><!--/input adresse -->
+						  
+						  <div class="form-group">
+							<label for="landTittleNumber">Numéro du Site au registre Régional:</label>
+							<input #land_number="ngModel" type="text" class="form-control" id="landTittleNumber" required
+							[(ngModel)] = "newSite.land_number" name="landNumber" placeholder="ex: 001848"/>
+							
+							<p *ngIf="land_number.control.hasError('required') && (land_number.touched)"
+							class="alert alert-danger validation-message">Adresse requise</p>
+							
+						 </div><!--/input landNumber -->
+						  
+						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
+						  <button id="send" type="submit" (click)="addNewSite()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+						</form>
+					</div><!-- form site-->	
+				<!--/fin CREATION NEW SITE-->	
+				
+				<!--CREATION NEW BUILDING-->	
+					<div *ngIf="isNewBuilding" >
+						<h1 [ngStyle]="{'color':'red'}" >Nouveau Batiment</h1>
+						<form   #formBuilding="ngForm" id="formulaire"  class="simple-form" >
+						
+						  <div class="form-group">
+							<label for="nom">Reference:</label>
+							<input #name="ngModel" type="text" class="form-control"  id="nom"
+								[(ngModel)] = "newBuilding.reference" name="address"	name="nomSite"	
+								required />
+								
+							<p *ngIf="name.control.hasError('required')&& (name.touched)"
+							class="alert alert-danger validation-message">Référence requise</p>
+							
+						  </div> <!--/input Reference -->
+						  
+						  <div class="form-group"><!-- select-->
+							<label for="site_id"> Site: </label>
+							<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="newBuilding.site_id" >
+								<option *ngFor="let site of sites_list"
+								[value]="site.site_id">Site : {{site.site_id }}</option>							
+							</select>
+							<!-- <p *ngIf="selectSite.control.hasError('required')"
+							class="alert alert-danger validation-message">Veuillez selectionner un Site</p> -->
+						  </div><!-- /select-->
+						  
+						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}</div>			  
+						  <button id="send" type="submit" (click)="addNewBuilding()"  class="btn btn-default" [disabled]="formBuilding.invalid" >Submit</button>					
+						</form>	
+					</div><!-- form batiment-->
+					
+				<!--/fin CREATION NEW BUILDING-->
+				
+				
+				<!--MODIFICATION SITE-->
+
+					<div *ngIf="modifSite" >
+						<h1 [ngStyle]="{'color':'red'}" >Modification Site</h1>
+
+						<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="selectedPolygon" >
+								<option *ngFor="let site of sites_list; let i = index"
+								[value]="i" (click)="onSelectSite(i)" >Site : {{site.site_id }}</option>							
+						</select>
+							<br/>
+						<form   #formBuilding="ngForm" id="formulaire"  class="simple-form" >
+						
+						  <div class="form-group">
+							<label for="nom">Reference:</label>
+							<input #name="ngModel" type="text" class="form-control"  id="nom"
+								[(ngModel)] = "sites_list[selectedPolygon].reference" name="address"	name="nomSite"	
+								required />
+								
+							<p *ngIf="name.control.hasError('required')&& (name.touched)"
+							class="alert alert-danger validation-message">Référence requise</p>
+							
+						  </div> <!--/input Reference -->
+						  
+						  
+						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}</div>			  
+						  <button id="send" type="submit" (click)="modificationSiteConfirme()"  class="btn btn-default" [disabled]="formBuilding.invalid" >Submit</button>					
+						</form>	
+					</div><!-- form batiment-->
+				
+					
+				
+				<!--/MODIFICATION SITE-->
+				
+				
+				<!--MODIFICATION BUILDING-->
+
+					<div *ngIf="modifBuilding" >
+						<h1 [ngStyle]="{'color':'red'}" >Modification Batiment</h1>
+
+						<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="selectedPolygon" >
+								<option *ngFor="let build of building_list; let i = index"
+								[value]="i" (click)="onSelectBuilding(i)" >Site : {{build.site_id }}</option>							
+						</select>
+							<br/>
+						<form   #formBuilding="ngForm" id="formulaire"  class="simple-form" >
+						
+						  <div class="form-group">
+							<label for="nom">Reference:</label>
+							<input #name="ngModel" type="text" class="form-control"  id="nom"
+								[(ngModel)] = "building_list[selectedPolygon].reference" name="address"	name="nomSite"	
+								required />
+								
+							<p *ngIf="name.control.hasError('required')&& (name.touched)"
+							class="alert alert-danger validation-message">Référence requise</p>
+							
+						  </div> <!--/input Reference -->
+						  
+						  
+						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}</div>			  
+						  <button id="send" type="submit" (click)="modificationBuildConfirme()"  class="btn btn-default" [disabled]="formBuilding.invalid" >Submit</button>					
+						</form>	
+					</div><!-- form batiment-->
+				
+					
+				
+				<!--/MODIFICATION BUILDING-->
+				
+				
+				
+			</div>
+			<!--/fin fomualaire ajout/modif site/building-->
+		</div><!-- /row-->
+		
+		<br /><br />
+		
+		<div class='row'>			
+			<div class="col-lg-12 text-center pb-5">
+				<button class="btn btn-primary btn-rond" id="confirmBtn" onclick="confirmation(false)" href="#"></button>
+				<button class="btn btn-primary btn-rond " onclick="zoom('zoomOut');" href="#"><span class="glyphicon glyphicon-minus img-responsive" style="font-size: 20px"></span></button>
+				<button  class="btn btn-primary btn-lg" href="#">Info Site</button>  
+			</div><!-- /button_footer-->			
+		</div><!-- /row-->	
+	</div><!-- /container-->
+  </body>
