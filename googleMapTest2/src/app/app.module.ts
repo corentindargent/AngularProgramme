@@ -16,6 +16,7 @@ import { GMapService } from './gmap-service.service';
 import { SiteService } from './service-site.service';
 import { FloorService } from './floor.service';
 import { SpaceService } from './space.service';
+import { DrawingOnSvgService }  from './drawing-on-svg.service';
 
 
 
@@ -30,7 +31,7 @@ import { SpaceService } from './space.service';
 	RoutingModule
 	
   ],
-  providers: [GMapService,SiteService,BuildingService,SpaceService,],
+  providers: [GMapService,SiteService,BuildingService,SpaceService,DrawingOnSvgService],
   bootstrap: [RootComponent]
 })
 export class AppModule { }
