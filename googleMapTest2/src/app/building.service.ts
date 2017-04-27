@@ -129,6 +129,7 @@ export class BuildingService {
 				
 				if(building[0].floors[0])	
 				{
+					console.log("G des enfans");
 					result.listFloor = this.constructFloorsOfBuilding(idBuilding,building[0].floors);
 				}
 				else
@@ -152,16 +153,15 @@ export class BuildingService {
 	let result : Array<Floor> = [];
 	console.log(buildId);
 	floorsOfABuilding.forEach( (floor) =>{
-					
+					console.log(floor);
 				var newFloor = new Floor();	
 				
 				newFloor.reference = floor.floorRef;
 				newFloor.id_floor = floor.floorId;
 				newFloor.polygon = this.convertStringPolygon(floor.floorPolygon);							
 				newFloor.listSpaces = this.constructSpacesOfFloor(floor.floorId,floor.spaces);	
+				newFloor.order_number = floor.order_number;				
 				
-				
-				console.log(newFloor);
 				result.push(newFloor);
 				
 			});
@@ -174,10 +174,11 @@ export class BuildingService {
 	let result : Array<Space> = [];	
 	
 	spacesOfAFloor.forEach( (space) =>{
-					
+		
+					console.log("Il y a un espace");
 				var newSpace = new Space();	
 				
-				newSpace.reference = space.floorRef;
+				newSpace.reference = space.spaceRef;
 				newSpace.id_floor = space.spaceId;
 				newSpace.polygon = this.convertStringPolygon(space.spacePolygon);							
 				newSpace.listReaders = space.objects;

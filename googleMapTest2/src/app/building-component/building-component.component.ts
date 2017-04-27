@@ -7,8 +7,9 @@ import { Location }                 from '@angular/common';
 
  
 import { BuildingService } from '../building.service';
-import { DrawingOnSvgService }  from '../drawing-on-svg.service';
-import { Building,Floor } from '../model'
+import { FloorService }  from '../floor.service';
+import { SpaceService } from '../space.service';
+import { Building,Floor,Space } from '../model'
 import * as d3 from 'd3';
 
 @Component({
@@ -18,69 +19,242 @@ import * as d3 from 'd3';
 })
 export class BuildingComponent implements OnInit {
 
+  private buildingId : number;
   building_data : Building = new Building();
   @ViewChild('svg') svgRef: ElementRef;
   svg :any;
   test: any;
-  pointsPolygon : Array<any>;
+ 
   drawing : boolean = false;
   isThereAFloor : boolean = false;
-  
+  notYetFloor : boolean = false;
+  pointsPolygon : Array<any>;
   
   //var creation new elements
+  
   @Input() newFloor : Floor; 
   isANewFloor : boolean = false;
   
-  
-  
-  
+  @Input() newSpace : Space;  
+  isANewSpace : boolean = false;
+  errorMessage : string;
+ formeSpace : Array<any>;
+  floorId : number;
 
-  constructor(private route : ActivatedRoute, private location: Location, private buildingService: BuildingService, private  drawingSvgService : DrawingOnSvgService) 
+  constructor(private route : ActivatedRoute, private location: Location,
+  private buildingService: BuildingService, private  floorService : FloorService, 
+  private spaceService : SpaceService) 
   {}
 
   ngOnInit() {
 	  console.log("FENETRE BUILDING");
-	 console.log(this.route.params);
-	 this.route.params.switchMap((params: Params) => this.buildingService.getDataOfABuild(+params['id']))
+	
+	 this.route.params.forEach((params :Params) => {
+		this.buildingId = +params['id'];
+		 
+	 });
+	 
+	 console.log(this.buildingId);
+	 this.buildingService.getDataOfABuild(this.buildingId )
     .subscribe(
 		(building : Building )  => {
 			this.building_data = building;
-			if(this.building_data.listFloor[0]){this.isThereAFloor = true;}
-			this.init();
-			this.svg = d3.select('svg');
+			if(this.building_data.listFloor[0]){this.isThereAFloor = true;}			
+			
 			this.test = document.getElementById('svg');
+			this.initPolygon();
 		},
 		(err:any) => {console.error(err); console.log(err.body)}
 	);
 	
   }
   
+  initPolygon(){
+	  
+		if(this.building_data.listFloor[0])
+		{
+			// ETAGE EXISTANT
+			console.log("floorExistant");
+			this.drawFloor(this.building_data.listFloor[0]);
+		}
+		else
+		{
+			console.log("Premiere fois ici");
+			this.init();					
+		} 
+  }
+  
+  // LORS CE QU4IL AURA DES ETAGES VOIR COMMENT LE SINTEGRE SVG
+  drawFloor(floor : Floor)
+  {
+	  //*ajout - ACTIVation BOUTON CREATION ESPACE*/
+	 
+	  var svg = this.test;
+	  svg.removeChild(svg.firstChild);
+	  
+	  this.floorId = floor.id_floor;	
+	 
+	  /* POLYGON ETAGES */
+	  var g = document.createElementNS("http://www.w3.org/2000/svg", 'g');     
+	  var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+	  
+	  
+	  
+	   polygon.setAttribute("points", this.ArrayToSvgPath(floor.polygon));
+	   polygon.setAttribute('id', 'poly');
+	   polygon.setAttribute('stroke', 'black');
+	   polygon.setAttribute('stroke-width', '4');
+	   polygon.setAttribute('fill', 'white');
+	   g.appendChild(polygon);
+	   g.setAttribute("id","g"); 
+	   
+	    /* POLYGON espaces */
+	   //var g_spaces = document.createElementNS("http://www.w3.org/2000/svg", 'g');  
+	   
+	   var self =this;
+	   
+	   floor.listSpaces.forEach(function(element,index)
+	   {
+		   let g_space = document.createElementNS("http://www.w3.org/2000/svg", 'g'); 
+		   let polygonSpace = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+		   polygonSpace.setAttribute("points", self.ArrayToSvgPath(element.polygon));
+			polygonSpace.setAttribute('id', 'polySpace'+index);
+			 polygonSpace.setAttribute('stroke', 'black');
+			polygonSpace.setAttribute('stroke-width', '2');
+			polygonSpace.setAttribute('fill', 'red'); 
+			
+			polygonSpace.addEventListener("mouseover",function(){this.setAttribute('fill', '#00FE08'); })
+			polygonSpace.addEventListener("mouseout",function(){this.setAttribute('fill', 'red');})
+			g_space.appendChild(polygonSpace);
+			g_space.setAttribute('id','g-space'+index);
+			g.appendChild(g_space);
+	   });
+		
+	   svg.appendChild(g);	
+	  	  
+  }
+  
+  
+  ArrayToSvgPath(arrayPolygon : Array<any>):any{
+	 
+    var svgPath = new Array();
+   
+        for (var i = 0; i < arrayPolygon.length; ++i) {
+            var point = arrayPolygon[i];
+            svgPath.push([arrayPolygon[i].lat, arrayPolygon[i].lng].join(','));
+        }                 
+	  
+	  return svgPath;
+  }
   
   
   /*init variable pour formaulire new floor + set boolean à true pour render visible formualire*/
   
   createNewFloor(){
 	this.newFloor = new Floor();
+	this.newFloor.id_building = this.buildingId;
 	
 	if(this.building_data.listFloor[0])// si il exsite un etage on set la forme du noueavu à celui exsitant
 	{
 		console.log("Le batiment possède deja un etage");
 		this.newFloor.polygon = this.building_data.listFloor[0].polygon;
+		this.drawFloor(this.newFloor);
+		console.log(this.newFloor.polygon[0]);
 	}
-	else
+	else// uniquement pour le premier étage d'un batiment
 	{
 		console.log("Le batiment ne possède pas encore d'etage");
-		console.log(this.building_data.listFloor[0]);
-		var tabPolygon = this.getCoordinatesWithoutConsideringViewBox();
-	}
-	  
+		console.log(this.building_data.listFloor[0]);		
+		
+		this.newFloor.polygon = this.getCoordinatesWithoutConsideringViewBox();
+	}	
+	this.isANewFloor = true;
   }
   
-  // go bac retourner page precedente
+
+  
+    addNewFloor(){
+		console.log(this.newFloor);
+		  this.floorService.addFloor(this.newFloor).subscribe(
+			floor => {console.log('create new floor'+floor);
+			},
+		  (err:any) => console.error(err) 
+		  ); 
+		  
+		  this.isANewFloor = false;
+	}
+	
+	
+  
+	addNewSpace(){
+		  if(!this.formeSpace ){
+			  
+			  this.errorMessage = "Veuillez tracer la forme de l'espace";
+		  }
+		  else
+		  {
+			  console.log("ADD");
+			
+				this.errorMessage = "";	
+					this.newSpace.polygon = this.pointsPolygon; 
+					this.newSpace.id_floor = this.floorId;
+					console.log(this.newSpace);
+				this.spaceService.addSpace(this.newSpace).subscribe(
+					floor => {console.log('create new floor'+floor);},
+					(err:any) => console.error(err) 
+				); 
+		        this.pointsPolygon.splice(0);
+				this.isANewSpace = false;
+				
+		  }
+	}
+  
+  
+   // go bac retourner page precedente
   goBack(): void {
   this.location.back();
   }
   
+  
+  
+  
+   
+ 
+  
+getCoordinatesWithoutConsideringViewBox():Array<any>{
+	
+	
+	var x = this.test;	
+	var viewPortWidth = x.width.baseVal.value;
+	var viewPortHeigth = x.height.baseVal.value;
+	
+	console.log(x);
+	
+	var polygon = x.getElementsByTagName("polygon")[0];
+	var viewbox = x.viewBox.baseVal;	
+	
+
+	var trueWidth = viewPortWidth/viewbox.width;	
+	var trueHeigth = viewPortHeigth/viewbox.height;
+	
+	console.log(viewPortHeigth);
+	var tabPolygon = new Array();
+	
+	for (let i = 0; i < polygon.points.length; i++ )
+	{
+		let obj = {};
+		obj["lat"]= (polygon.points[i].x - viewbox.x )*trueWidth;
+		obj["lng"] = (polygon.points[i].y - viewbox.y )*trueHeigth;
+		 console.log(obj); 
+		tabPolygon.push(obj);
+	}
+	console.log(tabPolygon);
+	return tabPolygon;	
+}
+
+
+
+/* METHODE TRACAGE POLYGON EN SVG A PARTIR DE COORDONNES LATLNG (GOOGLE MAP) */
 
  latLng2point(latLng) {
 
@@ -124,124 +298,9 @@ export class BuildingComponent implements OnInit {
 }
 
 
-getCoordinatesWithoutConsideringViewBox():Array<any>{
-	
-	var x = this.test;
-	console.log("SVG");
-	console.log(x);
-	console.log("SVG width");
-	console.log(x.width.baseVal.value);
-	//var x = document.getElementById("svg"); var polygon = x.getElementsByTagNameNS('http://www.w3.org/2000/svg',"polygon");
-	
-	var polygon = x.getElementsByTagName("polygon")[0];
-	var viewbox = x.viewBox.baseVal;
-	console.log("viewbox");
-	console.log(viewbox.width);
-	
-	var viewPortWidth = x.width.baseVal.value;
-	var viewPortHeigth = x.height.baseVal.value;
 
-	var trueWidth = viewPortWidth/viewbox.width;
-	
-	
-	var trueHeigth = viewPortHeigth/viewbox.height;
-	
-	console.log(trueWidth);
-	console.log(trueHeigth);
-	console.log(viewbox.x);
-	console.log(viewbox.y);
-	
-	var tabPolygon = polygon.points;
-	var tabS = polygon.points;
-	var indiceX, indiceY ;
-	//var 
-	
-	/*tab ser à rein directemetn retier les valeurs
-	//set à 0 le x et y 
-	for (let i = 0; i < polygon.points.length; i++ )
-	{
-		if(polygon.points[i].x == viewbox.x )
-		{
-			console.log(tabPolygon[i].x+" "+viewbox.x);
-			indiceX=i;
-		}
-		
-		if(polygon.points[i].y == viewbox.y)
-		{
-			console.log(tabPolygon[i].y+" "+viewbox.y);
-			indiceY=i;
-		}
-	}*/
-	
-	for (let i = 0; i < polygon.points.length; i++ )
-	{
-		console.log("Calcul coordonnées "+i);
-		console.log(polygon.points[i].x +" -  "+ viewbox.x +" = ");console.log( polygon.points[i].x - viewbox.x);
-		console.log(polygon.points[i].y +" - "+ viewbox.y+ " = ");console.log( polygon.points[i].y - viewbox.y);
-		console.log("/n");
-		tabPolygon[i].x = (polygon.points[i].x - viewbox.x )*trueWidth;
-		tabPolygon[i].y = (polygon.points[i].y - viewbox.y )*trueHeigth;
-		
-		//console.log(tabPolygon[i].x +" "+tabPolygon[i].y);
-	}
-	
-	return tabPolygon;
-	
-	
-	
-	/*
-		height="500"  width="500" 
-		viewBox="131,2897702852788 86,08866119384766 0,00032806396484375 0,0003757476806640625"
-		
-		131,2897702852788   86,0887565612793
-		131,289945761353  86,08866119384766
-		131,29009834924364	86,0889377593994
-		131,28992096582078	86,08903694152832 	
-		
-		
-		
-		
-		
-		
-		truewid = 500/0,00032806396484375 = 1524093,0232558139534883720930233
-		
-		true 500/0,0003757476806640625 = 1330680,2030456852791878172588832
-		
-		131,2897702852788,86,0887565612793
-		131,289945761353,86,08866119384766
-		131,29009834924364,86,0889377593994
-		131,28992096582078,86,08903694152832 	
-		
-						<=>
-						
-		0             ,0,00009536743164
-		0,0001754760742              , 0
-		0,00032806396484              ,	0,00027656555174
-		0,00015068054198              ,	0,00037574768066
-
-						<=>
-		0                             126,90355329866071065989847715736
-267,44186043653953488372093023256		0
-	499,99999999428465116279069767442	 368,02030454482517766497461928934
-	229,65116277212279069767441860465 499,9999999945941116751269035533
-//x.width.baseVal ;x.height.baseVal 
-	
-	//polygon,points litse de points 
-	
-	//
-	
-	//getTransformToElement
-	
-	*/
-	
-	
-	
-}
 
  drawPoly(node, props) {
-	 
-
-
 
    var svg = node.cloneNode(true);
     node.parentNode.replaceChild(svg, node);
@@ -255,20 +314,9 @@ getCoordinatesWithoutConsideringViewBox():Array<any>{
 	polygon.setAttribute('id', 'poly');
     
 	g.appendChild(polygon);
-    g.setAttribute("id","idG"); 
-    svg.appendChild(polygon);
-	
-	//svg,appendChild(polygon);
-	//svg,setAttribute('id', 'svgId');
-	svg.setAttribute('viewBox', [props.x, props.y, props.width, props.height].join(' '));	
-	
-	// d3.js
- /*var svg = d3.select("#svg");
-	 var g = svg.append('g').attr('id','svgId');
-	g.append('polygon').attr('points',props.path);
-	svg.append('polygon').attr('points',props.path);
-	svg.attr('viewBox', [props.x, props.y, props.width, props.height].join(' '));
-	 */
+    g.setAttribute("id","g"); 
+    svg.appendChild(polygon);	
+	svg.setAttribute('viewBox', [props.x, props.y, props.width, props.height].join(' '));		
 }
 
 
@@ -283,35 +331,42 @@ getCoordinatesWithoutConsideringViewBox():Array<any>{
 	var node = this.svgRef;
 	var noued = document.getElementById("svg");
     this.drawPoly(noued, svgProps);
-}
-
-bouh(){console.log('bouh');console.log(this.drawing);}
-
-draw(){
-	
-	this.drawOnSvg(this.closePolygon);
+	this.test = document.getElementById('svg');
 }
 
 
-drawOnSvg(closePolygon){
+
+/*METHODE DRAW POLYGON ON SVG*/
+
+
+
+
+
+drawOnSvg(){
+	this.svg = d3.select("g");
 	
-	console.log(this);	
-	var dragging = false, startPoint;
-	var svg = 	this.svg;
-    var self = this; /* garde contexet angular pour travailler sur les variables et faire appel au fonction */
+	var svg = 	this.svg;	//tester si retire
+	this.formeSpace = null;
+	this.isANewSpace = true;
+	this.newSpace = new Space();
+	
+	
+	
+    var self = this; /* conserver le contexte angular pour pouvoir travailler sur ses variables et/ou faire appel à ses fonctions */
+	var dragging = false, startPoint;		
 	var points = [];
 	var g;
 
-this.svg.on('mouseup', function(){ /*perte du contexte angular - d'ou utilité du self*/
+  this.svg.on('mouseup', function(){ /*perte du contexte angular - d'ou utilité du self*/
 	
 	console.log(this);
 	console.log("method creation");  	
     self.drawing = true;
-	self.bouh();
+	
 	
     startPoint = [d3.mouse(this)[0], d3.mouse(this)[1]];
 	console.log(d3.mouse(this)[0]+ ", "+d3.mouse(this)[1]);
-    if(svg.select('g,drawPoly').empty()) g = svg.append('g').attr('class', 'drawPoly');
+    if(svg.select('g.drawPoly').empty()) g = svg.append('g').attr('class', 'drawPoly');
 	
 	console.log(d3.event.target);
     if(d3.event.target.hasAttribute('is-handle')) {
@@ -361,15 +416,17 @@ this.svg.on('mousemove',  function() {
 
 
   closePolygon() {
-	  console.log("close");   
- 
-	  this.svg.select('g,drawPoly').remove();
+	  console.log("close");  
+	  this.formeSpace = this.pointsPolygon;
+	 this.svg.select('g.drawPoly').remove();
     var g = this.svg.append('g');
     g.append('polygon')
     .attr('points', this.pointsPolygon)
     .style('fill', this.getRandomColor());
-		console.log(this.pointsPolygon);
-
+		
+		
+	/*Pour tous les points du polygons du batiments dessiner un cercle qui permettre la modif de la forme*/
+	
     for(var i = 0; i < this.pointsPolygon.length; i++) {
         var circle = g.selectAll('circles')
         .data([this.pointsPolygon[i]])
@@ -384,10 +441,11 @@ this.svg.on('mousemove',  function() {
         .style({cursor: 'move'})
         //,call(dragger);
     }
-    this.pointsPolygon.splice(0);
+	   
     this.drawing = false;
-	
-	console.log("\n\n\n\n NEW CREATOIOn");
+	this.svg.on('mousemove', null);
+	this.svg.on('mouseup',null); 	
+	//propose dernier ajustement
 }
 
    getRandomColor() {

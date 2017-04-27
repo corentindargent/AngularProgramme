@@ -68,7 +68,14 @@ export class Building  {
 	}
 }
 
-
+export class PointsSvg{
+	
+	constructor(	
+		public x  : any,
+		public y    : any,	
+	) {}
+	
+}
 
 export class Floor   {
 	
@@ -92,7 +99,7 @@ export class Floor   {
 	this.id_building = -1;
 	this.polygon = null;
 	this.id_floor = -1;  
-	this.listSpaces = null;
+	this.listSpaces = new Array();
   }
 }
 

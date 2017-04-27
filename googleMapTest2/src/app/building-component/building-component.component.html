@@ -12,6 +12,12 @@
 		fill:red;
 	}
 	
+.select {
+			
+			stroke-width: 3;
+			fill: #00FE08;
+	}
+	
 	#idPoly{style="stroke:black;stroke-width:2px;fill:yellow"	}
     </style>
 
@@ -69,39 +75,32 @@
 	
 	<div class="container-fluid">
 	    <div class="row">
-			<div class="col-lg-offset-1 "></div>
+			<div class="col-lg-1 "> 
+				<ul>
+					<button *ngFor="let floor of building_data.listFloor; let i = index"
+					(click)="drawFloor(floor)">							
+						 {{ floor.reference }} 
+					</button>
+				</ul>
+						
+
+			</div>
 			
-			<div class="col-lg-7 col-lg-offset-1 "><!-- svg -->
-				 <svg #svg id="svg" height="500" width="500" preserveAspectRatio="xMidYMid meet">
-					<!-- <script type="text/ecmascript"> 
-						 <![CDATA[
-				var xm;var ym;
-				function coordonnees(evt)
-				{xm=evt.offsetX;ym=evt.offsetY; 
-					/*/!\ préférer OFFSET à CLIENT, pcq client get coordonnées par rapport à la page et le offset seulement dans le svg (coin sup gauche svg est le nouveau 0.0)*/
-				console.log(xm);console.log(ym);}
-				
-				]]> 
-			</script> -->
+			<div class="col-lg-7 col-lg-offset-1 ">
+				 <svg #svg id="svg" height="700" width="700" >
 				 </svg>	
-<!-- 				 <svg _ngcontent-c1="" height="600" id="svg" preserveAspectRatio="xMidYMid meet" width="600" viewBox="131.17679850012064 86.04345703125 0.0771484375 0.0537109375"><g id="idG"><polygon points="131.23343912512064,86.04345703125,131.17679850012064,86.09716796875,131.25394693762064,86.09716796875" id="poly"></polygon><g><polygon points="" style="fill: rgb(202, 230, 228);"></polygon></g><g><polygon points="131.2145538330078,86.061279296875,131.24476623535156,86.06629180908203" style="fill: rgb(147, 69, 148);"></polygon><circle cx="131.2145538330078" cy="86.061279296875"  fill="#FDBC07" stroke="#000" is-handle="true"></circle><circle cx="131.24476623535156" cy="86.06629180908203"  fill="#FDBC07" stroke="#000" is-handle="true"></circle></g><g><polygon points="" style="fill: rgb(9, 147, 184);"></polygon></g><g><polygon points="" style="fill: rgb(77, 225, 182);"></polygon></g><g><polygon points="" style="fill: rgb(31, 216, 142);"></polygon></g><g><polygon points="" style="fill: rgb(181, 26, 212);"></polygon></g><g><polygon points="" style="fill: rgb(0, 41, 116);"></polygon></g><g><polygon points="" style="fill: rgb(49, 117, 51);"></polygon></g><g><polygon points="" style="fill: rgb(26, 9, 119);"></polygon></g><g><polygon points="" style="fill: rgb(176, 172, 203);"></polygon></g><g><polygon points="" style="fill: rgb(62, 246, 127);"></polygon></g></g></svg>
- -->			</div><!-- /svg -->
+			</div>
 			
 			<div class="col-lg-3">
-				<button  id="send" type="submit" (click)="draw()"  class="btn btn-default"  >Drawing shapes</button>
+				<button  id="send" type="submit" (click)="drawOnSvg()"  class="btn btn-default" [disabled]="notYetFloor"  >Drawing shapes</button>
 				
 				<div><!-- tableauInfo -->
 				<!-- <div *ngIf="isThereAFloor"></div> -->
 					
-					<h1 [ngStyle]="{'color':'red'}" >BATIMENT {{building_data.reference}}</h1>
-					<ul>  
-						<li *ngFor=" let polygon of building_data.polygon">
-							{{polygon.lat }}   ,   {{ polygon.lng }}
-						</li>
-					 </ul>
+					<h1 [ngStyle]="{'color':'red'}" >BATIMENT {{building_data.reference}}</h1>					
 						<ul>
 							<li *ngFor=" let floor of building_data.listFloor"><!--liste de floor of build-->
-							    {{floor.reference}}
+							    Etage {{floor.order_number}}  {{floor.reference}}
 							     <ul>								
 									<li *ngFor="let space of floor.listSpaces let i = index" >	<!--liste de floor of build-->						
 											Space : {{space.reference }} 
@@ -124,7 +123,7 @@
 				</div><!-- /tableauInfo -->	
 				
 				
-				<!--formualire new etage-->
+				<!--FORMUALIRE NEW ETAGE-->
 				<div *ngIf="isANewFloor" >
 						<h1 [ngStyle]="{'color':'red'}" >Nouvelle Etage</h1>
 						<form #form="ngForm" id="formulaire"  class="simple-form" >
@@ -142,19 +141,42 @@
 						  
 						  <div class="form-group">
 							<label for="adressePostal">Numero de l'étage:</label>
-							<input #adresse="ngModel" type="number" class="form-control required" id="adressePostal" required
+							<input #FloorNumber="ngModel" type="number" class="form-control required" id="adressePostal" required
 							[(ngModel)] = "newFloor.order_number" name="address" placeholder="ex: Edouard Belin,50b"/>
 						  
-							<p *ngIf="adresse.control.hasError('required') && (adresse.touched)"
-							class="alert alert-danger validation-message">Adresse requise</p>
+							<p *ngIf="FloorNumber.control.hasError('required') && (FloorNumber.touched)"
+							class="alert alert-danger validation-message">Numero de l'étage requis</p>
 							
 						  </div><!--/input adresse -->
 						  
 						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
-						  <button id="send" type="submit" (click)="addNewSite()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+						  <button id="send" type="submit" (click)="addNewFloor()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
 						</form>
 					</div><!-- form site-->	
-				<!--/fin CREATION NEW SITE-->	
+				<!--/fin CREATION NEW FLOOR-->	
+				
+						
+				<!--FORMUALIRE NEW SPACE-->
+					<div *ngIf="isANewSpace" >
+						<h1 [ngStyle]="{'color':'red'}" >Nouvelle Espace</h1>
+						
+						<form #form="ngForm" id="formulaire"  class="simple-form" >
+						  <div class="form-group">
+							<label for="nomEspace">Reference:</label>
+							<input #name="ngModel" type="text" class="form-control"  id="nomEspace"
+								[(ngModel)] = "newSpace.reference" 	name="nomEspace"	
+								required />
+								
+							<p *ngIf="name.control.hasError('required')&& (name.touched)"
+							class="alert alert-danger validation-message">Référence requise</p>
+							
+						  </div> <!--/input Nom -->
+						  
+						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}	</div>			  
+						  <button id="send" type="submit" (click)="addNewSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+						</form>
+					</div><!-- form site-->	
+				<!--/fin CREATION NEW SPACE-->	
 				
 			</div>
 		

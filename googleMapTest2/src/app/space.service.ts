@@ -23,18 +23,19 @@ export class SpaceService {
 	  
   }
   
-  addSite(space: any){
+  addSpace(space: any){
 	  
 	
 	let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
 	let options  = new RequestOptions({ headers: headers });	
+console.log(space.polygon);
+    var cartesianPoints = [];	
+	cartesianPoints = this.constructJsonPolygon(space.polygon);
 
-
-//body ok -> VERIF SI POINTS CARTESAIN PASSE
 	let body = 
 	{   
 		"reference":space.reference,"id_floor":space.id_floor,
-		"x":space.x,"cartesian":{"points":space.polygon},"y":space.y,"z":space.z
+		"x":space.x,"cartesian":{"points":cartesianPoints},"y":space.y,"z":space.z
 	};
 
 	console.log(JSON.stringify(body));	
@@ -50,6 +51,16 @@ export class SpaceService {
 	.catch(SpaceService.handleError);		
 
 	}
+	
+   constructJsonPolygon(listPoints : Array<any>):Array<any>
+   {
+		 var tabJson = []; 
+		 for (var i = 0; i < listPoints.length; i++) {
+				var xy = listPoints[i];
+				tabJson.push({'x': xy[0],'y': xy[1]});
+		}
+		return tabJson;	  
+   }
 	
 	
 	updateSpace(space: Space)

@@ -30,15 +30,18 @@ export class FloorService {
 	let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
 	let options  = new RequestOptions({ headers: headers });	
 
-	
-//body ok -> VERIF SI POINTS CARTESAIN PASSE
+	console.log(floor.polygon);
+
+   var cartesianPoints = [];	
+	cartesianPoints = this.constructJsonPolygon(floor.polygon);
 	let body = 
 	{   
 		"reference":floor.reference,"order_number":floor.order_number,"id_building":floor.id_building,
-		"x":floor.x,"cartesian":{"points":floor.polygon},"y":floor.y,"z":floor.z
+		"x":floor.x,"cartesian":{"points":cartesianPoints},"y":floor.y,"z":floor.z
 	};
 
 	console.log(JSON.stringify(body));	
+	console.log(cartesianPoints[0]);
 
 	return this.http.post(this.baseUrl+'/add',body,options)
 		.map((response) => {
@@ -48,9 +51,19 @@ export class FloorService {
 			return response.json();
 			//return Observable.of(worker);
 		   })
-	.catch(FloorService.handleError);		
+	.catch(FloorService.handleError);	
 
 	}
-  
+	
+  constructJsonPolygon(listPoints : Array<any>):Array<any>
+  {
+	 var tabJson = []; 
+	 for (var i = 0; i < listPoints.length; i++) {
+				var xy = listPoints[i];
+				tabJson.push({'x': xy.lat,'y': xy.lng});
+	}
+		return tabJson;
+	  
+  }
   
 }
