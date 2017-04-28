@@ -11,11 +11,19 @@
 	g {
 		fill:red;
 	}
+	body{
+		padding : 0px 10px;
+	}
 	
 .select {
 			
 			stroke-width: 3;
 			fill: #00FE08;
+	}
+	
+	#selected
+	{
+		border: black thick  1px;
 	}
 	
 	#idPoly{style="stroke:black;stroke-width:2px;fill:yellow"	}
@@ -44,7 +52,7 @@
 			
 			<ul class="nav navbar-nav">
 			
-								
+			  <li><a id="newReader" [ngClass]="{'disabled':isOneSite}"  (click)="createNewReader();">Nouveau Reader</a></li>				
 			  <li><a id="newSite" [ngClass]="{'disabled':isOneSite}"  (click)="createNewFloor();">Nouvel etage</a></li>
 			  <li class="active"><a href="#">Home</a></li>
 			  <li class="dropdown">
@@ -78,7 +86,7 @@
 			<div class="col-lg-1 "> 
 				<ul>
 					<button *ngFor="let floor of building_data.listFloor; let i = index"
-					(click)="drawFloor(floor)">							
+					(click)="drawFloor(floor,index)">							
 						 {{ floor.reference }} 
 					</button>
 				</ul>
@@ -91,37 +99,46 @@
 				 </svg>	
 			</div>
 			
-			<div class="col-lg-3">
+			<div class="col-lg-3 ">
 				<button  id="send" type="submit" (click)="drawOnSvg()"  class="btn btn-default" [disabled]="notYetFloor"  >Drawing shapes</button>
-				
-				<div><!-- tableauInfo -->
-				<!-- <div *ngIf="isThereAFloor"></div> -->
+			<br /><br />
+			
+			<div class="row">	
+			
+				<div class="panel-group"><!-- tableauInfo -->				
+					<div class="panel panel-primary"> <!-- titre panneau -->
+						<div class="panel-heading"><!-- panel heading -->
+							<h1>Batiment selectionné : {{building_data.reference}}</h1>
+						</div><!-- /panel heading -->		
 					
-					<h1 [ngStyle]="{'color':'red'}" >BATIMENT {{building_data.reference}}</h1>					
-						<ul>
-							<li *ngFor=" let floor of building_data.listFloor"><!--liste de floor of build-->
-							    Etage {{floor.order_number}}  {{floor.reference}}
-							     <ul>								
-									<li *ngFor="let space of floor.listSpaces let i = index" >	<!--liste de floor of build-->						
-											Space : {{space.reference }} 
-											<ul *ngFor="let reader of space.listReaders; let i = index" >
-												<li>
-													
-												</li>										
-											</ul>
-											<ul *ngFor="let object of space.tabObjects; let i = index" >
-												<li>
-													{{object.id_object}}: {{object.reference}}
-												</li>										
-											</ul>
-											
-									</li> <!--/lisitng space of floor -->
-								 </ul>
-						    </li><!--/lisitng floor of building -->
-						</ul>
-					
+                         <div class="panel-body">
+							<ul>
+								<li *ngFor=" let floor of building_data.listFloor"><!--liste de floor of build-->
+									Etage {{floor.order_number}}  {{floor.reference}}
+									 <ul>								
+										<li *ngFor="let space of floor.listSpaces let i = index" >	<!--liste de floor of build-->						
+												Space : {{space.reference }} 
+												<!-- <ul *ngFor="let reader of space.listReaders; let i = index" >
+													<li>
+														
+													</li>										
+												</ul>
+												<ul *ngFor="let object of space.tabObjects; let i = index" >
+													<li>
+														{{object.id_object}}: {{object.reference}}
+													</li>										
+												</ul> -->
+												
+										</li> <!--/lisitng space of floor -->
+									 </ul>
+								</li><!--/lisitng floor of building -->
+							</ul>
+						 </div>
+					</div> <!-- /titre panneau -->
 				</div><!-- /tableauInfo -->	
 				
+			</div> <!-- /row -->
+			<div class="row">
 				
 				<!--FORMUALIRE NEW ETAGE-->
 				<div *ngIf="isANewFloor" >
@@ -177,7 +194,101 @@
 						</form>
 					</div><!-- form site-->	
 				<!--/fin CREATION NEW SPACE-->	
+			
 				
+				<!--FORMUALIRE NEW ETAGE-->
+				<div *ngIf="isANewReader" >
+						<h1 [ngStyle]="{'color':'red'}" >Nouveau Reader </h1>
+						<form #form="ngForm" id="formulaire"  class="simple-form" >
+						
+						  <div class="form-group">
+							<label for="nomReader">Reference:</label>
+							<input #name="ngModel" type="text" class="form-control"  id="nomReader"
+								[(ngModel)] = "newReader.reference" 	name="nomReader"	
+								required />
+								
+							<p *ngIf="name.control.hasError('required')&& (name.touched)"
+							class="alert alert-danger validation-message">Référence requise</p>
+							
+						  </div> <!--/input Mac adresse -->
+						  
+						  <div class="form-group">
+							<label for="adresseMac">Mac address:</label>
+							<input #MacAddress="ngModel" type="text" class="form-control required" id="adresseMac" required
+							[(ngModel)] = "newReader.mac" name="adresseMac" />
+						  
+							<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
+							class="alert alert-danger validation-message"> Adresse Mac requise </p>
+							
+						  </div><!--/input Mac adresse -->
+						  
+						  <div class="form-group">
+							<label for="fixe">Reader fixe:</label>
+							<input #Fixed="ngModel" type="boolean" class="form-control required" id="fixe" required
+							[(ngModel)] = "newReader.fixed" name="fixe" />
+						  
+							<p *ngIf="Fixed.control.hasError('required') && (Fixed.touched)"
+							class="alert alert-danger validation-message"> Cocher la case si reader fixe </p>
+							
+						  </div><!--/input Mac adresse -->
+						  
+						  <div class="form-group">
+							<label for="space">Space:</label>
+							<input disabled="disabled" #MacAddress="ngModel" type="text" class="form-control required" id="space" required
+							[(ngModel)] = "newReader.id_space" name="space" />
+						  
+							<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
+							class="alert alert-danger validation-message"> Numero de l'étage requis </p>
+							
+						  </div><!--/input Mac adresse -->
+						  
+						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
+						  <button id="send" type="submit" (click)="addNewReader()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+						</form>
+					</div><!-- form site-->	
+				<!--/fin CREATION NEW FLOOR-->	
+			
+			
+				<div *ngIf= "basicView" class="panel-group" >				
+				  <h1>Espace selectionné</h1>
+					<div *ngIf= "currentFloor.listSpaces[selectedSpace]">
+					<h2>{{currentFloor.listSpaces[selectedSpace].reference}}</h2>
+					      <div> <!-- si clic alors fiche formaulire-->
+							<form #form="ngForm" id="formulaire"  class="simple-form" >
+								  <div class="form-group">
+									<label for="nomEspace">Reference:</label>
+									<input #name="ngModel" type="text" class="form-control"  id="nomEspace"
+										[(ngModel)] = "currentFloor.listSpaces[selectedSpace].reference" 	name="nomEspace"	
+										required />
+										
+									<p *ngIf="name.control.hasError('required')&& (name.touched)"
+									class="alert alert-danger validation-message">Référence requise</p>
+									
+								  </div> <!--/input Nom -->
+								  
+								  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}	</div>			  
+								  <button id="send" type="submit" (click)="addNewSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+								</form>
+							</div>
+					 </div>
+					<!-- <table class= "table">
+						 <thead>
+							<tr>
+							  <th>Space : {{space.reference }}</th>							  
+							</tr>
+						  </thead>
+						  <tbody>
+							<tr>
+							  <th scope="row">1</th>
+							  <td>Mark</td>
+							  <td>Otto</td>
+							  <td>@mdo</td>
+							</tr>							
+						  </tbody>
+					</table> -->
+				 
+				</div>
+			</div>	
 			</div>
 		
 		</div>

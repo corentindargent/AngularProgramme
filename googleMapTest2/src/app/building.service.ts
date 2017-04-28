@@ -49,6 +49,7 @@ export class BuildingService {
 		for (var i = 0; i < listPoints.length; i++) {
 					var xy = listPoints[i];
 					tabJson.push({'x': xy.lat(),'y': xy.lng()});
+					 console.log( 'x :'+xy.lat()+", y :"+ xy.lng());
 		}
 			return tabJson;
 	  }
@@ -129,7 +130,7 @@ export class BuildingService {
 				
 				if(building[0].floors[0])	
 				{
-					console.log("G des enfans");
+					//console.log("G des enfans");
 					result.listFloor = this.constructFloorsOfBuilding(idBuilding,building[0].floors);
 				}
 				else
@@ -137,7 +138,7 @@ export class BuildingService {
 					result.listFloor = building[0].floors;
 				}
 										
-				console.log(result);							
+				//console.log(result);							
 		  }  
 		  return result;
 	    }	 //map array
@@ -151,9 +152,9 @@ export class BuildingService {
   constructFloorsOfBuilding(buildId : number,floorsOfABuilding:Array<any>):Array<Floor>
   {
 	let result : Array<Floor> = [];
-	console.log(buildId);
+	//console.log(buildId);
 	floorsOfABuilding.forEach( (floor) =>{
-					console.log(floor);
+					//console.log(floor);
 				var newFloor = new Floor();	
 				
 				newFloor.reference = floor.floorRef;
@@ -175,7 +176,7 @@ export class BuildingService {
 	
 	spacesOfAFloor.forEach( (space) =>{
 		
-					console.log("Il y a un espace");
+					//console.log("Il y a un espace");
 				var newSpace = new Space();	
 				
 				newSpace.reference = space.spaceRef;
@@ -184,7 +185,7 @@ export class BuildingService {
 				newSpace.listReaders = space.objects;
 				newSpace.tabObjects = space.readers;
 				
-				console.log(newSpace);
+				//console.log(newSpace);
 				result.push(newSpace);
 				
 			});

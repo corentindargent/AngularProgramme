@@ -9,7 +9,8 @@ import { Location }                 from '@angular/common';
 import { BuildingService } from '../building.service';
 import { FloorService }  from '../floor.service';
 import { SpaceService } from '../space.service';
-import { Building,Floor,Space } from '../model'
+import { ReaderService } from '../reader.service';
+import { Building,Floor,Space,Reader } from '../model'
 import * as d3 from 'd3';
 
 @Component({
@@ -19,31 +20,41 @@ import * as d3 from 'd3';
 })
 export class BuildingComponent implements OnInit {
 
-  private buildingId : number;
-  building_data : Building = new Building();
   @ViewChild('svg') svgRef: ElementRef;
   svg :any;
   test: any;
- 
-  drawing : boolean = false;
-  isThereAFloor : boolean = false;
-  notYetFloor : boolean = false;
-  pointsPolygon : Array<any>;
   
-  //var creation new elements
+  private building_data : Building = new Building();
+  private buildingId : number;
+  private currentFloor : Floor;
+  private selectedSpace : any = null;
+  basicView : boolean;//affiche form html
+  
+  //VAR DRAWNG SVG
+  pointsPolygon : Array<any>;
+  drawing : boolean = false;
+  
+ 
+  
+  
+  
+  //VAR - CREATE NEW FLOOR/SPACE
   
   @Input() newFloor : Floor; 
-  isANewFloor : boolean = false;
+  isANewFloor : boolean = false; //affiche form html
   
   @Input() newSpace : Space;  
-  isANewSpace : boolean = false;
+  isANewSpace : boolean = false; //affiche form html
   errorMessage : string;
- formeSpace : Array<any>;
-  floorId : number;
+  formeSpace : Array<any>;
+  floorId : number;  
+  
+  @Input() newReader : Reader;
+  isANewReader : boolean = false;
 
   constructor(private route : ActivatedRoute, private location: Location,
   private buildingService: BuildingService, private  floorService : FloorService, 
-  private spaceService : SpaceService) 
+  private spaceService : SpaceService, private readerService : ReaderService) 
   {}
 
   ngOnInit() {
@@ -54,19 +65,25 @@ export class BuildingComponent implements OnInit {
 		 
 	 });
 	 
-	 console.log(this.buildingId);
+	 this.initPage();	
+  }
+  
+  initPage(){
+	  
+	  console.log(this.buildingId);
 	 this.buildingService.getDataOfABuild(this.buildingId )
     .subscribe(
 		(building : Building )  => {
 			this.building_data = building;
-			if(this.building_data.listFloor[0]){this.isThereAFloor = true;}			
+			console.log(this.building_data);
+			//if(this.building_data.listFloor[0]){this.isThereAFloor = true;}			
 			
 			this.test = document.getElementById('svg');
 			this.initPolygon();
 		},
 		(err:any) => {console.error(err); console.log(err.body)}
 	);
-	
+	  
   }
   
   initPolygon(){
@@ -74,7 +91,7 @@ export class BuildingComponent implements OnInit {
 		if(this.building_data.listFloor[0])
 		{
 			// ETAGE EXISTANT
-			console.log("floorExistant");
+			console.log(this.building_data.listFloor[0]);
 			this.drawFloor(this.building_data.listFloor[0]);
 		}
 		else
@@ -86,13 +103,19 @@ export class BuildingComponent implements OnInit {
   
   // LORS CE QU4IL AURA DES ETAGES VOIR COMMENT LE SINTEGRE SVG
   drawFloor(floor : Floor)
-  {
-	  //*ajout - ACTIVation BOUTON CREATION ESPACE*/
-	 
+  {	 	  
+	//*ajout - ACTIVation BOUTON CREATION ESPACE
+	  this.currentFloor = floor;
 	  var svg = this.test;
 	  svg.removeChild(svg.firstChild);
 	  
+	  //apres avoir creer etages on recharge la map, il peut encore y avoir la viewBox 
+	  svg.setAttribute("viewBox",null);
+	  
 	  this.floorId = floor.id_floor;	
+	  //this.currentFloor = index;
+	  
+	  
 	 
 	  /* POLYGON ETAGES */
 	  var g = document.createElementNS("http://www.w3.org/2000/svg", 'g');     
@@ -111,28 +134,79 @@ export class BuildingComponent implements OnInit {
 	    /* POLYGON espaces */
 	   //var g_spaces = document.createElementNS("http://www.w3.org/2000/svg", 'g');  
 	   
-	   var self =this;
-	   
-	   floor.listSpaces.forEach(function(element,index)
+	   var self =this;	   
+	  floor.listSpaces.forEach(function(element,index)
 	   {
+		   self.basicView = true;
+		   
 		   let g_space = document.createElementNS("http://www.w3.org/2000/svg", 'g'); 
 		   let polygonSpace = document.createElementNS('http://www.w3.org/2000/svg','polygon');
 		   polygonSpace.setAttribute("points", self.ArrayToSvgPath(element.polygon));
-			polygonSpace.setAttribute('id', 'polySpace'+index);
+			polygonSpace.setAttribute('id', ""+index);
 			 polygonSpace.setAttribute('stroke', 'black');
 			polygonSpace.setAttribute('stroke-width', '2');
 			polygonSpace.setAttribute('fill', 'red'); 
 			
-			polygonSpace.addEventListener("mouseover",function(){this.setAttribute('fill', '#00FE08'); })
-			polygonSpace.addEventListener("mouseout",function(){this.setAttribute('fill', 'red');})
+			polygonSpace.addEventListener("mouseover",function(){this.setAttribute('fill', '#00FE08');self.selectedSpace = this.id; })
+			polygonSpace.addEventListener("mouseout",function(){this.setAttribute('fill', 'red');self.selectedSpace =null;})
+			//polygonSpace.addEventListener("click",function(){self.editPolygon(this);})	
+			
 			g_space.appendChild(polygonSpace);
-			g_space.setAttribute('id','g-space'+index);
+			g_space.setAttribute('id',""+index);
 			g.appendChild(g_space);
 	   });
 		
 	   svg.appendChild(g);	
 	  	  
   }
+  
+  
+  /*   *** A travailler dessus behavior not assecible
+	dragger : any = d3.behavior.drag()
+    .on('drag', function handleDrag() {
+    
+    var dragCircle = d3.select(this), newPoints = [], circle;
+    
+    var poly = d3.select(this.parentNode).select('polygon');
+    var circles = d3.select(this.parentNode).selectAll('circle');
+    dragCircle
+    .attr('cx', d3.event.x)
+    .attr('cy', d3.event.y);
+    for (var i = 0; i < circles[0].length; i++) {
+        circle = d3.select(circles[0][i]);
+        newPoints.push([circle.attr('cx'), circle.attr('cy')]);
+    }
+    poly.attr('points', newPoints);
+   }); */
+  
+  
+  editPolygon(polygon : any)
+  { 
+	  var gr = polygon.parentNode;
+	  console.log(polygon);
+	  console.log(gr.id);
+	  var g = d3.select('#gr.id');
+		for(var i = 0; i < polygon.points.length; i++) {
+		  
+			  var circle = g.selectAll('circles')
+			.data([polygon.points[i]])
+			.enter()
+			.append('circle')
+			.attr('cx', polygon.points[i][0])
+			.attr('cy', polygon.points[i][1])
+			.attr('r', 4)
+			.attr('fill', '#FDBC07')
+			.attr('stroke', '#000')
+			.attr('is-handle', 'true')
+			.style({cursor: 'move'})
+			//.call(dragger);	***		
+		}		
+			
+  }
+  
+  
+    
+  
   
   
   ArrayToSvgPath(arrayPolygon : Array<any>):any{
@@ -150,7 +224,51 @@ export class BuildingComponent implements OnInit {
   
   /*init variable pour formaulire new floor + set boolean à true pour render visible formualire*/
   
+  
+  
+  createNewReader(){
+	this.basicView = false;
+	this.isANewReader = true;
+	
+	this.newReader = new Reader();
+	var self = this;
+	
+/* 	js
+	var g = this.test.firstChild;
+	var gChild = g.getElementsByTagNameNS("http://www.w3.org/2000/svg","g");
+	
+	
+	
+		for(let i = 0; i < gChild.length ; i++){	
+		
+		   
+		   var polyChild = gChild[i].getElementsByTagNameNS("http://www.w3.org/2000/svg","polygon");
+		   
+		   for(let  i = 0; i < polyChild.length; i++)
+		   {
+			   polyChild[i].removeListener("mouseover");
+			   polyChild[i].removeListener("mouseout");
+			   polyChild[i].addEventListener("click",function(){console.log("Coucou clic !")});
+
+		   }			
+			
+		} 	  */
+	  
+	  
+	var g = d3.select('g');
+	var gChild = g.selectAll('g').select('polygon')
+	.on("mouseover",null)
+	.on("mouseout",null)
+	.on("click",function(){console.log("Coucou clic !")});
+	
+	  
+  }
+  
+  
+ 
+  
   createNewFloor(){
+	  this.basicView = false;
 	this.newFloor = new Floor();
 	this.newFloor.id_building = this.buildingId;
 	
@@ -174,19 +292,21 @@ export class BuildingComponent implements OnInit {
 
   
     addNewFloor(){
+		this.isANewFloor = false;
 		console.log(this.newFloor);
 		  this.floorService.addFloor(this.newFloor).subscribe(
 			floor => {console.log('create new floor'+floor);
-			},
+			 this.initPage(); },
 		  (err:any) => console.error(err) 
 		  ); 
 		  
-		  this.isANewFloor = false;
+		 
 	}
 	
 	
   
 	addNewSpace(){
+		this.basicView = false;
 		  if(!this.formeSpace ){
 			  
 			  this.errorMessage = "Veuillez tracer la forme de l'espace";
@@ -282,6 +402,7 @@ getCoordinatesWithoutConsideringViewBox():Array<any>{
             maxX = Math.max(maxX, point.x);
             maxY = Math.max(maxY, point.y);
             svgPath.push([point.x, point.y].join(','));
+			console.log(point.x+" "+point.y);
         }
 
 
@@ -302,7 +423,7 @@ getCoordinatesWithoutConsideringViewBox():Array<any>{
 
  drawPoly(node, props) {
 
-   var svg = node.cloneNode(true);
+   var svg = node.cloneNode(false);
     node.parentNode.replaceChild(svg, node);
 	
    var g = document.createElementNS("http://www.w3.org/2000/svg", 'g');      
