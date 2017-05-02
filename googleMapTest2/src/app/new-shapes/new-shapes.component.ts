@@ -155,21 +155,38 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		drawingManagerTest.setOptions({drawingControl: false,drawingMode: null});
 	}
 	
-	drawPolygon(siteList: Array<Site> )	{
-		//desisner
-	}
-	
-	
 	
 	resetHTML(){
-		this.isNewSite=false;
-		this.isNewBuilding=false;
+		if(this.isNewSite || this.isNewBuilding ){
+			this.isNewSite=false;
+			this.isNewBuilding=false;
+			this.removeDrawingManager();
+		}
+		
+		if(this.modifSite){
+			this.modifSite=false;
+			
+			//Modification pas confirmer car user decider autre operation rest forme couleur et edition
+			this.listePolygon[this.lastSelected].setOptions({fillColor: '#00DE43'});
+			this.listePolygon[this.lastSelected].setOptions({editable:false });
+		
+			var path = this.sites_list[this.lastSelected].polygon;
+			this.listePolygon[this.lastSelected].setPath(path);
+			
+		}
+		
+		if(this.modifBuilding){
+			this.modifBuilding=false;
+			/* REST DERNIER SITE SELECTIONNE (COULEUR)*/
+		    this.listePolygonBatiment[this.lastSelected].setOptions({fillColor: '#0073F7'});
+		}
 	}
 	
 	addPolygons(bool: boolean){//init processus creation site/batiment		
 		
 		NewShapesComponent.polygon = null;//set à null
 		NewShapesComponent.isASite = bool; // var permettant d'associer au ploygone creer les options du site / batiment
+		this.resetHTML();
 		if(bool)//creation site
 		{
 			this.newSite = new Site();
@@ -321,6 +338,7 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 	modificationSite()	
 	{	
 	    console.log("Modif");
+		this.resetHTML();
 		this.modifSite = true;
 		this.selectedPolygon = 0; // par defaut le premier element sera selectionne
 		
@@ -369,6 +387,7 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 	modificationBuilding()	
 	{	
 	   console.log("Modif");
+	   this.resetHTML();
 		this.modifBuilding = true;
 		this.selectedPolygon = 0; // par defaut le premier element sera selectionne
 		

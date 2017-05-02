@@ -50,7 +50,12 @@ export class BuildingComponent implements OnInit {
   floorId : number;  
   
   @Input() newReader : Reader;
-  isANewReader : boolean = false;
+  isANewReader : boolean = false; //affiche form html
+  
+  //VAR - CREATE NEW READER
+	lastSelectedSpace  : any;
+  
+  
 
   constructor(private route : ActivatedRoute, private location: Location,
   private buildingService: BuildingService, private  floorService : FloorService, 
@@ -86,6 +91,43 @@ export class BuildingComponent implements OnInit {
 	  
   }
   
+  
+  /*A changer/ modifier --
+			pour le moment permet de garder coherent HTML ne pas avoir tous les formulaires d'ajout de nouvel element à la fois
+			et retire les events lies a la creation de telles ou telles instances 
+  */
+  resetHtml(){
+	
+	
+	var g = d3.select('g');//get le 1st g comprenant la forme de l'étage
+	var gChild = g.selectAll('g');//get tous les g (où un g == 1 space) de c comprenant la forme de l'étage
+	
+	if(this.basicView){
+		
+	  gChild.on("mouseover",null)
+			.on("mouseout",null)
+			.on("click",null);
+		this.basicView = false;
+	}
+	
+	if(this.isANewSpace) {
+		this.isANewSpace = false;
+		g.on("mouseup",null)
+		g.on("mousemove",null);
+	}
+	
+	if(this.isANewReader){
+		this.isANewReader = false;
+		gChild.select('polygon').on('click',null);
+	}
+	
+	if(this.isANewFloor){
+	  this.isANewFloor = false;
+	  this.drawFloor(this.building_data.listFloor[0]);
+	}
+	
+  }
+  
   initPolygon(){
 	  
 		if(this.building_data.listFloor[0])
@@ -104,60 +146,70 @@ export class BuildingComponent implements OnInit {
   // LORS CE QU4IL AURA DES ETAGES VOIR COMMENT LE SINTEGRE SVG
   drawFloor(floor : Floor)
   {	 	  
-	//*ajout - ACTIVation BOUTON CREATION ESPACE
+	//ajout - ACTIVation BOUTON CREATION ESPACE
 	  this.currentFloor = floor;
-	  var svg = this.test;
-	  svg.removeChild(svg.firstChild);
+	  this.floorId = floor.id_floor;
 	  
-	  //apres avoir creer etages on recharge la map, il peut encore y avoir la viewBox 
-	  svg.setAttribute("viewBox",null);
+	
 	  
-	  this.floorId = floor.id_floor;	
-	  //this.currentFloor = index;
-	  
-	  
-	 
-	  /* POLYGON ETAGES */
-	  var g = document.createElementNS("http://www.w3.org/2000/svg", 'g');     
-	  var polygon = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+	  var svg = d3.select('svg');
+	  //retire le g et ses enfants de l'arborescence
+	  var g = svg.select('g');
+	  g.remove();
 	  
 	  
-	  
-	   polygon.setAttribute("points", this.ArrayToSvgPath(floor.polygon));
-	   polygon.setAttribute('id', 'poly');
-	   polygon.setAttribute('stroke', 'black');
-	   polygon.setAttribute('stroke-width', '4');
-	   polygon.setAttribute('fill', 'white');
-	   g.appendChild(polygon);
-	   g.setAttribute("id","g"); 
-	   
+	    //version d3
+ var g =  svg.append('g').attr('id', 'g');
+ 
+ 
+ var polygon = g.append('polygon')
+		.attr('id', 'poly')
+		.attr('stroke', 'black')
+		.attr('stroke-width', '4')
+		.attr('fill', 'white')
+		.attr('stroke', 'black')
+		.attr("points", this.ArrayToSvgPath(floor.polygon))
+ 
 	    /* POLYGON espaces */
 	   //var g_spaces = document.createElementNS("http://www.w3.org/2000/svg", 'g');  
 	   
-	   var self =this;	   
+	   var self =this;	 
+	   self.basicView = true;  
 	  floor.listSpaces.forEach(function(element,index)
 	   {
-		   self.basicView = true;
-		   
-		   let g_space = document.createElementNS("http://www.w3.org/2000/svg", 'g'); 
-		   let polygonSpace = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-		   polygonSpace.setAttribute("points", self.ArrayToSvgPath(element.polygon));
-			polygonSpace.setAttribute('id', ""+index);
-			 polygonSpace.setAttribute('stroke', 'black');
-			polygonSpace.setAttribute('stroke-width', '2');
-			polygonSpace.setAttribute('fill', 'red'); 
-			
-			polygonSpace.addEventListener("mouseover",function(){this.setAttribute('fill', '#00FE08');self.selectedSpace = this.id; })
-			polygonSpace.addEventListener("mouseout",function(){this.setAttribute('fill', 'red');self.selectedSpace =null;})
-			//polygonSpace.addEventListener("click",function(){self.editPolygon(this);})	
-			
-			g_space.appendChild(polygonSpace);
-			g_space.setAttribute('id',""+index);
-			g.appendChild(g_space);
+		  
+		   var g_space = g.append('g')
+				.attr('id', "g"+index);
+				
+			var polygonSpace = g_space.append('polygon')
+				.attr("points", self.ArrayToSvgPath(element.polygon))
+				.attr('id', ""+index)
+				.attr('stroke-width', '2')
+				.attr('stroke', 'black')
+				.attr('fill', 'red')
+				.on("mouseover",function(){this.setAttribute('fill', '#00FE08');self.selectedSpace = this.id; })
+				.on("mouseout",function(){this.setAttribute('fill', 'red');self.selectedSpace =null;})
+				.on('click',function(){alert("Ddod");})
+				
+				element.listReaders.forEach(function(element,index)
+				{
+					  
+					   console.log(element);
+					  
+							
+						var circle = g_space.append('circle')
+							.attr("cx", element.x)
+							.attr("cy", element.y)
+							.attr('r', 4)
+							.attr('fill', 'yellow')
+							.attr('stroke', 'black')
+							.attr('is-handle', 'true')
+							.on('click',function(){alert("Modifier la position du reader");})
+				   
+				});
+	   
 	   });
-		
-	   svg.appendChild(g);	
-	  	  
+	 
   }
   
   
@@ -205,11 +257,7 @@ export class BuildingComponent implements OnInit {
   }
   
   
-    
-  
-  
-  
-  ArrayToSvgPath(arrayPolygon : Array<any>):any{
+  ArrayToSvgPath(arrayPolygon : Array<any>):any{ //il y a 1 erreur lors associe directement 
 	 
     var svgPath = new Array();
    
@@ -222,61 +270,90 @@ export class BuildingComponent implements OnInit {
   }
   
   
-  /*init variable pour formaulire new floor + set boolean à true pour render visible formualire*/
-  
-  
-  
-  createNewReader(){
-	this.basicView = false;
+    //__ NEW READER __
+	
+  createNewReader(){	  
+	this.resetHtml();
 	this.isANewReader = true;
-	
-	this.newReader = new Reader();
+	this.newReader = new Reader(); //var lie au formualire ajout
 	var self = this;
-	
-/* 	js
-	var g = this.test.firstChild;
-	var gChild = g.getElementsByTagNameNS("http://www.w3.org/2000/svg","g");
-	
-	
-	
-		for(let i = 0; i < gChild.length ; i++){	
-		
-		   
-		   var polyChild = gChild[i].getElementsByTagNameNS("http://www.w3.org/2000/svg","polygon");
-		   
-		   for(let  i = 0; i < polyChild.length; i++)
-		   {
-			   polyChild[i].removeListener("mouseover");
-			   polyChild[i].removeListener("mouseout");
-			   polyChild[i].addEventListener("click",function(){console.log("Coucou clic !")});
-
-		   }			
-			
-		} 	  */
 	  
 	  
 	var g = d3.select('g');
 	var gChild = g.selectAll('g').select('polygon')
 	.on("mouseover",null)
 	.on("mouseout",null)
-	.on("click",function(){console.log("Coucou clic !")});
+	.on("click",function(){self.addShapesOfNewReader(this)});
+		  
+  }
+  
+  addShapesOfNewReader(selected){
+	  
+	  if(this.lastSelectedSpace)
+	  {
+		  this.lastSelectedSpace.setAttribute('fill', 'red');
+		  var lastSelected = d3.select('#g'+this.lastSelectedSpace.id).select('circle');
+		  lastSelected.remove();
+	  }  
+		  
+	  
+	  selected.setAttribute('fill', '#00FE08');
+	  
+	  
+	 // get le g contenant le selected(polygon) via id == g+index
+	  var selectPolygon = d3.select('#g'+selected.id);	 
 	
+	  var circle = selectPolygon.append('circle')
+			.attr('cx', d3.mouse(selected)[0])
+			.attr('cy', d3.mouse(selected)[1])
+			.attr('r', 4)
+			.attr('fill', 'yellow')
+			.attr('stroke', 'black')
+			.attr('is-handle', 'true')
+			
+	   //Associe la pos x,y et id_space à la nouvelle instance Reader		
+	  this.newReader.x = d3.mouse(selected)[0];
+	  this.newReader.y = d3.mouse(selected)[1];
+	  this.newReader.id_space = this.currentFloor.listSpaces[selected.id].id_space; 
+	  
+	  
+	  this.lastSelectedSpace = selected; 
+  }
+  
+  
+  addNewReader(){
+	
+	if(this.newReader.id_space == -1)
+	{
+		this.errorMessage = "Veuillez sélectionner la pièce à assigner au nouveua reader.";
+	}
+	else
+	{
+		this.errorMessage = "";
+		console.log(this.newReader);
+		
+		this.readerService.addReader(this.newReader).subscribe(
+			floor => {console.log(floor);
+			  this.initPage();  },
+		  (err:any) => console.error(err) 
+		  ); 
+	}
 	  
   }
   
   
+ //__ NEW FLOOR __
  
-  
   createNewFloor(){
-	  this.basicView = false;
+	this.resetHtml();
+	
 	this.newFloor = new Floor();
 	this.newFloor.id_building = this.buildingId;
 	
-	if(this.building_data.listFloor[0])// si il exsite un etage on set la forme du noueavu à celui exsitant
+	if(this.building_data.listFloor[0])// si le batiment possede un etage, alors on set la forme du noueavu à un exsitant
 	{
-		console.log("Le batiment possède deja un etage");
 		this.newFloor.polygon = this.building_data.listFloor[0].polygon;
-		this.drawFloor(this.newFloor);
+		this.drawFloor(this.newFloor);// dessiner le nouvel etage
 		console.log(this.newFloor.polygon[0]);
 	}
 	else// uniquement pour le premier étage d'un batiment
@@ -320,7 +397,7 @@ export class BuildingComponent implements OnInit {
 					this.newSpace.id_floor = this.floorId;
 					console.log(this.newSpace);
 				this.spaceService.addSpace(this.newSpace).subscribe(
-					floor => {console.log('create new floor'+floor);},
+					floor => {console.log('create new floor'+floor);this.initPolygon();},
 					(err:any) => console.error(err) 
 				); 
 		        this.pointsPolygon.splice(0);
@@ -462,8 +539,11 @@ getCoordinatesWithoutConsideringViewBox():Array<any>{
 
 
 
+//__ NEW SPACE __
 
 drawOnSvg(){
+	this.resetHtml();
+	
 	this.svg = d3.select("g");
 	
 	var svg = 	this.svg;	//tester si retire

@@ -118,16 +118,16 @@
 									 <ul>								
 										<li *ngFor="let space of floor.listSpaces let i = index" >	<!--liste de floor of build-->						
 												Space : {{space.reference }} 
-												<!-- <ul *ngFor="let reader of space.listReaders; let i = index" >
+												<ul *ngFor="let reader of space.listReaders let i = index" >
 													<li>
-														
+														  Reader : {{ reader.readerRef }}
 													</li>										
 												</ul>
-												<ul *ngFor="let object of space.tabObjects; let i = index" >
+												<ul *ngFor="let object of space.tabObjects let i = index" >
 													<li>
 														{{object.id_object}}: {{object.reference}}
 													</li>										
-												</ul> -->
+												</ul>
 												
 										</li> <!--/lisitng space of floor -->
 									 </ul>
@@ -196,7 +196,7 @@
 				<!--/fin CREATION NEW SPACE-->	
 			
 				
-				<!--FORMUALIRE NEW ETAGE-->
+				<!--FORMUALIRE NEW READER-->
 				<div *ngIf="isANewReader" >
 						<h1 [ngStyle]="{'color':'red'}" >Nouveau Reader </h1>
 						<form #form="ngForm" id="formulaire"  class="simple-form" >
@@ -222,17 +222,17 @@
 							
 						  </div><!--/input Mac adresse -->
 						  
-						  <div class="form-group">
-							<label for="fixe">Reader fixe:</label>
-							<input #Fixed="ngModel" type="boolean" class="form-control required" id="fixe" required
-							[(ngModel)] = "newReader.fixed" name="fixe" />
+						  <div class="form-group"> <!--input fixe -->
+							<label for="fixe">Reader fixe:
+							<input #Fixed="ngModel" type="checkbox" class="form-control required" id="fixe" required
+							[(ngModel)] = "newReader.fixed" name="fixe" /> </label>
+							<p  class="alert alert-info validation-message"> Cocher la case si votre reader est fixe</p>
 						  
-							<p *ngIf="Fixed.control.hasError('required') && (Fixed.touched)"
-							class="alert alert-danger validation-message"> Cocher la case si reader fixe </p>
+						  </div><!--/input fixe -->
 							
-						  </div><!--/input Mac adresse -->
+							
 						  
-						  <div class="form-group">
+						  <div class="form-group"><!--input space -->
 							<label for="space">Space:</label>
 							<input disabled="disabled" #MacAddress="ngModel" type="text" class="form-control required" id="space" required
 							[(ngModel)] = "newReader.id_space" name="space" />
@@ -240,13 +240,13 @@
 							<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
 							class="alert alert-danger validation-message"> Numero de l'étage requis </p>
 							
-						  </div><!--/input Mac adresse -->
+						  </div><!--/input space -->
 						  
 						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
 						  <button id="send" type="submit" (click)="addNewReader()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
 						</form>
 					</div><!-- form site-->	
-				<!--/fin CREATION NEW FLOOR-->	
+				<!--/fin CREATION NEW READER-->	
 			
 			
 				<div *ngIf= "basicView" class="panel-group" >				
@@ -267,7 +267,7 @@
 								  </div> <!--/input Nom -->
 								  
 								  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}	</div>			  
-								  <button id="send" type="submit" (click)="addNewSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+								  <button id="send" type="submit"   class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
 								</form>
 							</div>
 					 </div>

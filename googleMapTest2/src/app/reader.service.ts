@@ -45,7 +45,7 @@ export class ReaderService {
 		return this.http.post(this.baseUrl+'/add',body,options)
 			.map((response) => {
 				
-				console.log('update result received in service:');
+				console.log('update result reader received in service:');
 				
 				return response.json();				
 			})			   

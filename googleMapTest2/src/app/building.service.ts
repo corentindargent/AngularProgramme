@@ -176,22 +176,43 @@ export class BuildingService {
 	
 	spacesOfAFloor.forEach( (space) =>{
 		
-					//console.log("Il y a un espace");
 				var newSpace = new Space();	
 				
 				newSpace.reference = space.spaceRef;
-				newSpace.id_floor = space.spaceId;
+				newSpace.id_space = space.spaceId;
+				newSpace.id_floor = floorId;
 				newSpace.polygon = this.convertStringPolygon(space.spacePolygon);							
-				newSpace.listReaders = space.objects;
-				newSpace.tabObjects = space.readers;
-				
-				//console.log(newSpace);
+				newSpace.listReaders = space.readers;
+				newSpace.tabObjects = space.objects;
+			
 				result.push(newSpace);
 				
 			});
-	 
+			
 	return  result;	  
   }
   
-
+  
+  constructReadersOfSpace(spaceId : number,readerOfASpace:Array<any>):Array<any>{
+	  
+	  console.log("ya");
+	  let result:Array<Reader> = [];
+	  
+	  readerOfASpace.forEach((reader) => {
+		  var newReader = new Reader();
+		  
+		  newReader.id_reader = reader.readerId;
+		  newReader.x = reader.x;
+		  newReader.y = reader.y;
+		  newReader.reference = reader.readerRef;
+		  
+		  console.log(newReader);
+		  
+	  });
+	  return  result;	
+  }
+	  
 }
+		  
+	  
+
