@@ -53,7 +53,8 @@ export class FloorService {
 		   })
 	.catch(FloorService.handleError);	
 
-	}
+  }
+	  
 	
   constructJsonPolygon(listPoints : Array<any>):Array<any>
   {
@@ -63,7 +64,6 @@ export class FloorService {
 				tabJson.push({'x': xy.lat,'y': xy.lng});
 	}
 		return tabJson;
-	  
   }
   
 }

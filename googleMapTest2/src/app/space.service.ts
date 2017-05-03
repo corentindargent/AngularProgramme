@@ -29,8 +29,9 @@ export class SpaceService {
 	let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
 	let options  = new RequestOptions({ headers: headers });	
 console.log(space.polygon);
+
     var cartesianPoints = [];	
-	cartesianPoints = this.constructJsonPolygon(space.polygon);
+	cartesianPoints = this.constructJsonPolygon(space.polygon,true);
 
 	let body = 
 	{   
@@ -52,31 +53,23 @@ console.log(space.polygon);
 
 	}
 	
-   constructJsonPolygon(listPoints : Array<any>):Array<any>
-   {
-		 var tabJson = []; 
-		 for (var i = 0; i < listPoints.length; i++) {
-				var xy = listPoints[i];
-				tabJson.push({'x': xy[0],'y': xy[1]});
-		}
-		return tabJson;	  
-   }
-	
-	
 	updateSpace(space: Space)
 	{
 		let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
 		let options  = new RequestOptions({ headers: headers });
         
+		console.log(space.polygon[0]);
 		
+		var cartesianPoints = [];	
+		cartesianPoints = this.constructJsonPolygon(space.polygon,false);
 		
 		//body ok -> VERIF SI POINTS CARTESAIN PASSE
         let body = 
 		{   
-			"reference":space.reference,"id_floor":space.id_floor,
-			"x":space.x,"cartesian":{"points":space.polygon},"y":space.y,"z":space.z
+			"reference":space.reference,"id_floor":space.id_floor,"space_id":space.id_space,
+			"x":space.x,"cartesian":{"points":cartesianPoints},"y":space.y,"z":space.z
 		};
-		
+		console.log(JSON.stringify(body));
 		 /*PUT PASSE PAS ; BLOQUER */
 		return this.http.post(this.baseUrl+'/update',body,options)
 			.map((response) => {
@@ -86,6 +79,25 @@ console.log(space.polygon);
 			})
 			.catch(SpaceService.handleError);		
 	}
+	
+	
+	
+	//boolean permet de savoir distinguer l'ajout  de la modification car le polygon est "stockee" de manière différente selon "l'action"
+   constructJsonPolygon(listPoints : Array<any>,addNewInstance : boolean):Array<any>   
+   {
+		 var tabJson = []; 
+		 for (var i = 0; i < listPoints.length; i++) {
+			 var xy = listPoints[i];
+			 if(addNewInstance){
+
+				tabJson.push({'x': xy[0],'y': xy[1]});
+			 }
+			 else{
+				 tabJson.push({'x': xy.x,'y': xy.y});
+			 }
+		}
+		return tabJson;	  
+   }
   
 
 }

@@ -248,6 +248,31 @@
 					</div><!-- form site-->	
 				<!--/fin CREATION NEW READER-->	
 			
+			   <!--FORM MODIF SPACE-->
+					<div *ngIf="UpdateSpace" >
+						<h1 [ngStyle]="{'color':'red'}" >Modifier Espace</h1>
+						<div *ngIf="selectedSpace">
+							<form #form="ngForm" id="formulaire"  class="simple-form" >
+							  <div class="form-group">
+								<label for="nomEspace">Reference:</label>
+								<input #name="ngModel" type="text" class="form-control"  id="nomEspace"
+									[(ngModel)] = "currentFloor.listSpaces[selectedSpace.id].reference" 	name="nomEspace"	
+									required />
+									
+								<p *ngIf="name.control.hasError('required')&& (name.touched)"
+								class="alert alert-danger validation-message">Référence requise</p>
+								
+							  </div> <!--/input Nom -->
+							  
+							  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}	</div>			  
+							  <button id="send" type="submit" (click)="ConfirmUpdateSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+							</form>
+						</div>
+					</div>
+			   
+			   <!--/FORM MODIF SPACE-->
+			
+			
 			
 				<div *ngIf= "basicView" class="panel-group" >				
 				  <h1>Espace selectionné</h1>

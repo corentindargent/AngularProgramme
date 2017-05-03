@@ -186,7 +186,6 @@ export class BuildingService {
 				newSpace.tabObjects = space.objects;
 			
 				result.push(newSpace);
-				
 			});
 			
 	return  result;	  
