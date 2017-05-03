@@ -27,6 +27,11 @@
 	}
 	
 	#idPoly{style="stroke:black;stroke-width:2px;fill:yellow"	}
+	
+	li.selectFloor{
+		font-size: larger;
+		
+	}
     </style>
 
     <link href="/css/bootstrap.min.css" rel="stylesheet">
@@ -113,9 +118,10 @@
 					
                          <div class="panel-body">
 							<ul>
-								<li *ngFor=" let floor of building_data.listFloor"><!--liste de floor of build-->
+								<li *ngFor=" let floor of building_data.listFloor" [class.selectFloor]="floor == currentFloor"(click)="drawFloor(floor,index)"
+								style="cursor:pointer"><!--liste de floor of build-->
 									Etage {{floor.order_number}}  {{floor.reference}}
-									 <ul>								
+									 <ul *ngIf="floor == currentFloor">								
 										<li *ngFor="let space of floor.listSpaces let i = index" >	<!--liste de floor of build-->						
 												Space : {{space.reference }} 
 												<ul *ngFor="let reader of space.listReaders let i = index" >
