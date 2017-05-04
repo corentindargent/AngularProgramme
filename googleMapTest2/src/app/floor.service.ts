@@ -23,7 +23,7 @@ export class FloorService {
   }
   
   
-  addFloor(floor: any){
+  addFloor(floor: Floor){
 	  
 	/*DATA SEND */
 
@@ -48,7 +48,7 @@ export class FloorService {
 			
 			console.log('update result received in service:');
 			
-			return response.json();
+			return response/* .json() */;
 			//return Observable.of(worker);
 		   })
 	.catch(FloorService.handleError);	

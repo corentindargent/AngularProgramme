@@ -56,7 +56,7 @@ export class BuildingService {
   
 /*NEW BUIDLING*/  
 
-    addBuilding(building : any){		 
+    addBuilding(building : Building){		 
 			 
 		let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
 		let options  = new RequestOptions({ headers: headers });	
@@ -75,7 +75,7 @@ export class BuildingService {
 		return this.http.post(this.baseUrl+'/add',body,options)
 		.map((response) => {
 			console.log('update result received in service:');			
-			return response.json();
+			return response/* .json() */;
 		})
 	    .catch(BuildingService.handleError);
 	}
@@ -83,7 +83,7 @@ export class BuildingService {
 	
 	
 /*UPDATE BUIDLING*/		
-	updateBuilding(building : any){
+	updateBuilding(building : Building){
 	 
 		let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
 		let options  = new RequestOptions({ headers: headers });	
@@ -104,7 +104,7 @@ export class BuildingService {
 		return this.http.post(this.baseUrl+'/update',body,options)
 			.map((response) => {
 				console.log('update result received in service:');			
-				return response.json();
+				return response/* .json() */;
 			})
 			.catch(BuildingService.handleError);
 	}
@@ -182,7 +182,7 @@ export class BuildingService {
 				newSpace.id_space = space.spaceId;
 				newSpace.id_floor = floorId;
 				newSpace.polygon = this.convertStringPolygon(space.spacePolygon);							
-				newSpace.listReaders = space.readers;
+				newSpace.listReaders = this.constructReadersOfSpace(space.spaceId,space.readers);
 				newSpace.tabObjects = space.objects;
 			
 				result.push(newSpace);
@@ -204,9 +204,11 @@ export class BuildingService {
 		  newReader.x = reader.x;
 		  newReader.y = reader.y;
 		  newReader.reference = reader.readerRef;
+		  newReader.id_space = spaceId;
+		  
 		  
 		  console.log(newReader);
-		  
+		  result.push(newReader);
 	  });
 	  return  result;	
   }

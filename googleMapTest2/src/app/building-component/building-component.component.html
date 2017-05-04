@@ -126,7 +126,7 @@
 												Space : {{space.reference }} 
 												<ul *ngFor="let reader of space.listReaders let i = index" >
 													<li>
-														  Reader : {{ reader.readerRef }}
+														  Reader : {{ reader.reference }}
 													</li>										
 												</ul>
 												<ul *ngFor="let object of space.tabObjects let i = index" >
@@ -230,7 +230,7 @@
 						  
 						  <div class="form-group"> <!--input fixe -->
 							<label for="fixe">Reader fixe:
-							<input #Fixed="ngModel" type="checkbox" class="form-control required" id="fixe" required
+							<input #Fixed="ngModel" type="checkbox" class="form-control required" id="fixe" 
 							[(ngModel)] = "newReader.fixed" name="fixe" /> </label>
 							<p  class="alert alert-info validation-message"> Cocher la case si votre reader est fixe</p>
 						  
@@ -278,6 +278,52 @@
 			   
 			   <!--/FORM MODIF SPACE-->
 			
+			
+		<!--
+				<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="currentFloor.listSpaces[spaceIndex].listReaders[readerIndex].id_space" >
+								<option *ngFor="let space of currentFloor.listSpaces"
+								[value]="space.site_id">Site : {{site.site_id }}</option>							
+							</select>
+		
+		
+		-->
+			
+			
+			<!--FORMUALIRE NEW READER-->
+				<div *ngIf="UpdateReader" >
+						<h1 [ngStyle]="{'color':'red'}" >Update Reader </h1>
+						<form #form="ngForm" id="formulaire"  class="simple-form" >
+						
+						  <div class="form-group"> <!--input reference -->
+							<label for="nomReader">Reference:</label>
+							<input #name="ngModel" type="text" class="form-control"  id="nomReader"
+								[(ngModel)] = "currentFloor.listSpaces[spaceIndex].listReaders[readerIndex].reference" 	name="nomReader"	
+								required />
+								
+							<p *ngIf="name.control.hasError('required')&& (name.touched)"
+							class="alert alert-danger validation-message">Référence requise</p>
+							
+						  </div> <!--/input reference -->
+						  
+						  <div class="form-group"><!--input space -->
+							<label for="space">Space:</label>
+							<select  #MacAddress="ngModel" class="form-control"  id="space" name="space" [(ngModel)]="currentFloor.listSpaces[spaceIndex].listReaders[readerIndex].id_space" >
+								<option *ngFor="let space of currentFloor.listSpaces; let i = index"
+								[value]="space.id_space" (click)="moveReader(i)"> {{space.id_space }} - {{ space.reference }}</option>							
+							</select>
+							<!-- <input disabled="disabled" #MacAddress="ngModel"  class="form-control required" id="space" required
+							[(ngModel)] = "currentFloor.listSpaces[spaceIndex].listReaders[readerIndex].id_space" name="space" /> -->
+						  
+							<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
+							class="alert alert-danger validation-message"> Espace doit etre selectionne </p>
+							
+						  </div><!--/input space -->
+						  
+						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
+						  <button id="send" type="submit" (click)="ConfirmUpdateReader()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+						</form>
+					</div><!-- form site-->	
+				<!--/fin CREATION NEW READER-->	
 			
 			
 				<div *ngIf= "basicView" class="panel-group" >				

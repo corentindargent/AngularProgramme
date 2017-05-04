@@ -34,32 +34,33 @@ export class BuildingComponent implements OnInit {
   pointsPolygon : Array<any>;
   drawing : boolean = false;
   
- 
-  
-  
-  
-  //VAR - CREATE NEW FLOOR/SPACE
-  
-  @Input() newFloor : Floor; 
-  isANewFloor : boolean = false; //affiche form html
-  
-  @Input() newSpace : Space;  
-  isANewSpace : boolean = false; //affiche form html
-  errorMessage : string;
-  formeSpace : Array<any>;
-  floorId : number;  
-  
-  @Input() newReader : Reader;
-  isANewReader : boolean = false; //affiche form html
-  
-  //VAR - CREATE NEW READER
-	lastSelectedSpace  : any;
-   
-  //VAR - MODIFICATION SPACES
-  
-  UpdateSpace : boolean = false;
-  
+ //VAR - CREATE NEW FLOOR/SPACE/READER  
+	  @Input() newFloor : Floor; 
+	  isANewFloor : boolean = false; //affiche form html
+	  
+	  @Input() newSpace : Space;  
+	  isANewSpace : boolean = false; //affiche form html
+	  errorMessage : string;
+	  formeSpace : Array<any>;
+	  floorId : number;  
+	  
+	  @Input() newReader : Reader;
+	  isANewReader : boolean = false; //affiche form html
+	  lastSelectedSpace  : any;
 
+   
+  //VAR - MODIFICATION SPACES  
+    UpdateSpace : boolean = false;  
+
+  //VAR - MODIFICATION POS READER
+	  selectedReader : any;
+	  private spaceIndex : any;
+	  private readerIndex : any;
+	  UpdateReader : boolean = false;
+	  spaceOfReader : any;
+	  readerUpdate : Reader = new Reader();//***
+	  
+	  
   constructor(private route : ActivatedRoute, private location: Location,
   private buildingService: BuildingService, private  floorService : FloorService, 
   private spaceService : SpaceService, private readerService : ReaderService) 
@@ -121,11 +122,17 @@ export class BuildingComponent implements OnInit {
 		g.on("mousemove",null);
 	}
 	
-	
 	if(this.isANewFloor){
 	  this.isANewFloor = false;
 	  this.drawFloor(this.building_data.listFloor[0]);
 	}
+	
+	
+	/*
+	//SI la derniere operation est un MAJ il faut recharger les "données"
+    //car la modification des champs textuels se fait directemetn dans une "variable global (de travaile) des données"
+	// ses chagements seront visible dans la variable sans pour autant avoir ete stocke dans BDD
+	*/
 	
 	if(this.UpdateSpace)
 	{
@@ -139,6 +146,23 @@ export class BuildingComponent implements OnInit {
 			this.selectedSpace.setAttribute("points",this.ArrayToSvgPath(this.currentFloor.listSpaces[index].polygon));
 		}
 		this.UpdateSpace = false;
+		this.initPage();
+	}
+	
+	if(this.UpdateReader)
+	{
+		if(this.selectedReader)
+		{
+			/*CODE COPIER-COLLER EPUTE METTRE DANS FUNCTION*/
+			var oldPost = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex]; 
+			this.selectedReader.setAttribute('cx',oldPost.x);
+		    this.selectedReader.setAttribute('cy',oldPost.y);			
+			d3.select(this.selectedReader).call(d3.drag().on("drag",null));
+			d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');//remet la couleur de base au polygon dans lequelles est defini le reader 
+		}
+		
+		this.UpdateReader = false;
+		this.initPage();
 	}
 	
   }
@@ -159,8 +183,8 @@ export class BuildingComponent implements OnInit {
   }
   
   // LORS CE QU4IL AURA DES ETAGES VOIR COMMENT LE SINTEGRE SVG
-  drawFloor(floor : Floor)
-  {	 	  
+  drawFloor(floor : Floor){	 
+  
 	//ajout - ACTIVation BOUTON CREATION ESPACE
 	  this.currentFloor = floor;
 	  this.floorId = floor.id_floor;
@@ -205,7 +229,7 @@ export class BuildingComponent implements OnInit {
 				//.on("mouseover",function(){this.setAttribute('fill', '#00FE08');self.selectedSpace = this.id; })
 				//.on("mouseout",function(){this.setAttribute('fill', 'red');self.selectedSpace = null;})
 				.on('click',function(){self.editShapesOfSpace(this)})
-				
+			
 				element.listReaders.forEach(function(element,index)
 				{
 					  
@@ -219,14 +243,23 @@ export class BuildingComponent implements OnInit {
 							.attr('fill', '#81DAF5')
 							.attr('stroke', 'black')
 							.attr('is-handle', 'true')
-							.on('click',function(){alert("Modifier la position du reader");})
-				   
+							.attr('id',"Reader"+index+"OfSpace"+element.id_space) /* id assez long pour permettre d'avoir un id unique car utilisation selectByIdn
+							
+							peut etre retirer simplifie etant dnne que l'on applique event directement sur l'element clique */
+							
+							//.call(d3.drag().on("drag",function(){self.dragReader(this)}))
+				            .on("click",function(){self.updatePosReader(this)})
 				});
 	   
 	   });
 	 
   }
   
+  
+  
+  
+  
+  /* UPDATE SHAPE SPACE */
   
   updateSpaces(){
 	  this.resetHtml();
@@ -256,12 +289,15 @@ export class BuildingComponent implements OnInit {
 		  
 	  this.UpdateSpace = false;
 	}
-  
-  
-  //modifier forme de l'espace selectionné
-  
-  editShapesOfSpace(polygon : any)
-  {  
+    
+  //modifier forme de l'espace selectionné  
+  editShapesOfSpace(polygon : any){
+	  
+	  if(this.UpdateReader)//Bloquer modification car deja entrain de modifier un Reader
+	  {
+		  return;
+	  }
+	  
   this.UpdateSpace = true;
 	 if(this.selectedSpace)//si qq chose stocke, set le dernier selectionner a defaut
 	 {
@@ -296,52 +332,116 @@ export class BuildingComponent implements OnInit {
 	  }
 	  
   }
-  //  METHODE MODIFICATION FORME  POLYGON VERISON ORIGINAL   (tous en d3.js)
-  /* handleDrag(selected : any){
-	  console.log(selected);
-    var dragCircle = d3.select(selected), newPoints = [], circle;
-    
-    var poly = d3.select(selected.parentNode).select('polygon');
-    var circles = d3.select(selected.parentNode).selectAll('circle');
-    console.log(circles);
-	
-	dragCircle
-    .attr('cx', d3.event.x)
-    .attr('cy', d3.event.y);
-	
-    for (var i = 0; i < circles[0].length; i++) {
-        circle = d3.select(circles[0][i]);
-        newPoints.push([circle.attr('cx'), circle.attr('cy')]);
-    }
-	
-    poly.attr('points', newPoints);	  
-  } */
-  
-  
-   // *** Probleme avec selectAll de d3.js (aucun array en sortie)
-	// Donc la partie recueprant les cercles a ete fait en DOM traditionel et non d3.js   
-	
-	dragger : any = d3.drag()
-    .on('drag', function handleDrag() { 
-	
-    var dragCircle = d3.select(this), newPoints = [], circle;
-	
-	var circles1 =this.parentNode.getElementsByTagName("circle");
-	var poly1 = this.parentNode.getElementsByTagName('polygon')[0];
-	
-    dragCircle
-    .attr('cx', d3.event.x)
-    .attr('cy', d3.event.y);
-	
-	
-    for (var i = 0; i < circles1.length; i++) {
-		
-        newPoints.push([circles1[i].cx.baseVal.value, circles1[i].cy.baseVal.value]);		
-	}	
-    poly1.setAttribute('points', newPoints);
-	
-   });
+ 
+ 
+ 
+   /* UPDATE POS READER */
    
+   updatePosReader(circleSelect : any){
+	  
+		
+	   if(this.UpdateSpace){//Si on est en train de modifier un espace il faut bloquer l'update d'un reader la position d'un reader
+		   return;
+	   }
+	  
+	   if(this.selectedReader == circleSelect){return} //le circleSelect est identique au dernier reader selectionne donc quitte fct
+	  
+	  var self = this;	//conserver le contexte Angular
+	  this.UpdateReader = true; //rendre visible le form html
+	  
+	  if(this.selectedReader){//si il y a un reader selectionne, il faut reset ses valeurs (couleurs , ...)
+	  
+		  //set couleur par defaut
+		  this.selectedReader.setAttribute('fill', '#81DAF5');
+		  
+		  //set position de base de l'element 		  
+			/*CODE COPIER-COLLER EPUTE METTRE DANS FUNCTION*/
+		  var oldPost = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex]; 
+		  this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex].id_space = this.spaceIndex; 
+		  this.selectedReader.setAttribute('cx',oldPost.x);
+		  this.selectedReader.setAttribute('cy',oldPost.y);		  
+		  
+		  d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');
+		   //set event drag à null
+		  d3.select(this.selectedReader).call(d3.drag().on("drag",null))		  
+	  }
+	  
+	  this.selectedReader = circleSelect;	  
+	  
+	  this.spaceIndex = circleSelect.parentNode.id.match(/[0-9]+/g)[0]; 	// id est creer de facon a contenir index del4espaces dasn la variable 
+	  this.readerIndex = circleSelect.id.match(/[0-9]+/g)[0];   			//global contenant les données donc j'en extrait uniqumene tl'index
+	  
+	  this.selectedReader.setAttribute('fill', '#00FE08');
+	  
+	  //garnit la variable d'update du reader ***
+	  var data_readerSelected = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex];
+	  
+	  this.readerUpdate.id_reader = data_readerSelected.id_reader; //***
+	  this.readerUpdate.reference = data_readerSelected.reference; //***
+	  this.readerUpdate.id_space = data_readerSelected.id_space;  //***
+	  
+	  d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', '#E2C7EA'); 	  
+	  d3.select(circleSelect).call(d3.drag().on("drag",function(){self.dragReader(this)}))
+	  
+  }
+   
+   ConfirmUpdateReader(){
+	   var reader = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex];
+	   
+	   reader.fixed = false;	   
+	   reader.x = this.selectedReader.getAttribute('cx');
+	   reader.y = this.selectedReader.getAttribute('cy');
+	   
+	   console.log(reader);
+	   this.readerService.updateReader(reader).subscribe(
+			() => {console.log("ok");
+			  this.initPage();  },
+		  (err:any) => console.error(err) 
+		  ); 
+		  
+		  this.UpdateReader = false;
+		  d3.select(this.selectedReader).call(d3.drag().on("drag",null));
+		  this.selectedReader.setAttribute('fill', '#81DAF5');
+   }
+   
+   
+   //handle forme Reader
+	 dragReader(circleSelect : any){	 
+				 
+	   var dragCircle = d3.select(circleSelect), newPoints = [], circle;
+		dragCircle
+		.attr('cx', d3.event.x)
+		.attr('cy', d3.event.y);
+			
+	}
+   
+   
+    moveReader(index : number)
+	{
+		//Set les couleurs de l'ancine et du nouveua parent
+		d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');	
+		d3.select("#g"+index).select("polygon").attr('fill', '#E2C7EA');	
+		
+		var oldParent = this.selectedReader.parentNode;		
+		var newParent = document.getElementById("g"+index);
+		
+		//remove 
+		oldParent.removeChild(this.selectedReader);
+		
+		//add 
+		var polygon = newParent.getElementsByTagName('polygon')[0];//recupere le polygon du nouvel espace pour placer le reader dasn son "périmètre"
+			
+		this.selectedReader.setAttribute('cx',polygon.points[0].x);
+	    this.selectedReader.setAttribute('cy',polygon.points[0].y);
+		
+		newParent.appendChild(this.selectedReader)
+		
+		this.readerUpdate.id_space = this.currentFloor.listSpaces[index].id_space;//getId psace du nouvel espace du reader
+		
+		
+	}
+   
+    //handle forme Space
   handleDrag(circleSelect : any) {    
     var dragCircle = d3.select(circleSelect), newPoints = [], circle;
 	
@@ -362,6 +462,7 @@ export class BuildingComponent implements OnInit {
    }
   
   
+
   
   
   
@@ -472,6 +573,7 @@ export class BuildingComponent implements OnInit {
 			  this.initPage();  },
 		  (err:any) => console.error(err) 
 		  ); 
+		  this.isANewReader = false;
 	}
 	  
   }

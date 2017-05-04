@@ -14,7 +14,7 @@ export class SiteService {
   public site :Site;
   private baseUrl :string  = "http://indoor.traxxeo.com/service";  
   
-  
+  //APRES L'appel A  UN SERVICE CELUI-CI RETURN STRING ET NON PLUS UN JSON
   
   constructor(private http : Http) {
 	}
@@ -152,7 +152,7 @@ export class SiteService {
 	return this.http.post(this.baseUrl+'/building/add',body,options)
 		.map((response) => {
 			console.log('update result received in service:');			
-			return response.json();
+			return response/* .json() */;
 		})
 	    .catch(SiteService.handleError);
 	}
@@ -182,7 +182,7 @@ export class SiteService {
 	return this.http.post(this.baseUrl+'/building/update',body,options)
 		.map((response) => {
 			console.log('update result received in service:');			
-			return response.json();
+			return response/* .json() */;
 		})
 	    .catch(SiteService.handleError);
 	}
@@ -214,7 +214,7 @@ export class SiteService {
 			
 			console.log('update result received in service:');
 			
-			return response.json();
+			return response/* .json() */;
 			//return Observable.of(worker);
 		   })
 	.catch(SiteService.handleError);		
@@ -243,7 +243,7 @@ export class SiteService {
 			.map((response) => {
 				console.log('update result received in service:');
 			
-			return response.json();
+			return response/* .json() */;
 			})
 			.catch(SiteService.handleError);		
 	}

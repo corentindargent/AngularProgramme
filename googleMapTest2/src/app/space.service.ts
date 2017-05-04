@@ -23,7 +23,7 @@ export class SpaceService {
 	  
   }
   
-  addSpace(space: any){
+  addSpace(space: Space){
 	  
 	
 	let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
@@ -46,7 +46,7 @@ console.log(space.polygon);
 			
 			console.log('update result received in service:');
 			
-			return response.json();
+			return response/* .json() */;
 			//return Observable.of(worker);
 		   })
 	.catch(SpaceService.handleError);		
@@ -75,7 +75,7 @@ console.log(space.polygon);
 			.map((response) => {
 				console.log('update result received in service:');
 			
-			return response.json();
+			return response/* .json() */;
 			})
 			.catch(SpaceService.handleError);		
 	}

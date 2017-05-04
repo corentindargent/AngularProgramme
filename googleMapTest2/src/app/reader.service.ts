@@ -23,7 +23,7 @@ export class ReaderService {
   
   /* {"z":3.456,"id_space":1,"fixed":true,"y":2.345,"mac":"Mac","reference":"Reader1","x":1.234} */
   
-  addReader(reader: any){
+  addReader(reader: Reader){
 	  
 		/*DATA SEND */
 
@@ -47,10 +47,37 @@ export class ReaderService {
 				
 				console.log('update result reader received in service:');
 				
-				return response.json();				
+				return response/* .json() */;				
 			})			   
 		.catch(ReaderService.handleError);	
 
+	}
+	
+	updateReader(reader : any)
+	{
+		let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
+		let options  = new RequestOptions({ headers: headers });	
+
+		
+		console.log(reader);
+		let body = 
+		{   
+			"reference":reader.reference,"id_space":reader.id_space,"reader_id":reader.id_reader,
+			"x":reader.x,"y":reader.y,"z":reader.z,"fixed":reader.fixed,
+		};
+
+		console.log(JSON.stringify(body));	
+		
+
+		return this.http.post(this.baseUrl+'/update',body,options)
+			.map((response) => {
+				
+				console.log('update result reader received in service:');
+				
+				return response/* .json() */;				
+			})			   
+		.catch(ReaderService.handleError);	
+		
 	}
   
   
