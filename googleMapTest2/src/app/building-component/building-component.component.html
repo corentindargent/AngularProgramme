@@ -309,7 +309,7 @@
 							<label for="space">Space:</label>
 							<select  #MacAddress="ngModel" class="form-control"  id="space" name="space" [(ngModel)]="readerUpdate.id_space" >
 								<option *ngFor="let space of currentFloor.listSpaces; let i = index;"
-								[value]="space.id_space" (click)="moveReader(i)"> {{space.id_space }} - {{ space.reference }}</option>							
+								[value]="space.id_space" (click)="moveReader(i)" required> {{space.id_space }} - {{ space.reference }}</option>							
 							</select>
 							<!-- <input disabled="disabled" #MacAddress="ngModel"  class="form-control required" id="space" required
 							[(ngModel)] = "currentFloor.listSpaces[spaceIndex].listReaders[readerIndex].id_space" name="space" /> -->

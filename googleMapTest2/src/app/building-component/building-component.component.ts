@@ -58,7 +58,7 @@ export class BuildingComponent implements OnInit {
 	  private readerIndex : any;
 	  UpdateReader : boolean = false;
 	  spaceOfReader : any;
-	  readerUpdate : Reader = new Reader();//***
+	  @Input() readerUpdate : Reader = new Reader();//***
 	  
 	  
   constructor(private route : ActivatedRoute, private location: Location,
@@ -153,10 +153,20 @@ export class BuildingComponent implements OnInit {
 	{
 		if(this.selectedReader)
 		{
-			/*CODE COPIER-COLLER EPUTE METTRE DANS FUNCTION*/
-			var oldPost = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex]; 
-			this.selectedReader.setAttribute('cx',oldPost.x);
-		    this.selectedReader.setAttribute('cy',oldPost.y);			
+			d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');//remet la couleur de base au polygon dans lequelles est defini le reader 
+		  var oldParent = this.selectedReader.parentNode;		
+		  var newParent = document.getElementById("g"+this.spaceIndex);  
+		  
+			//remove 
+		  oldParent.removeChild(this.selectedReader);
+		
+			//add 
+			 var oldPost = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex]; 		  
+			  this.selectedReader.setAttribute('cx',oldPost.x);
+			  this.selectedReader.setAttribute('cy',oldPost.y);	
+		  
+			newParent.appendChild(this.selectedReader);
+			
 			d3.select(this.selectedReader).call(d3.drag().on("drag",null));
 			d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');//remet la couleur de base au polygon dans lequelles est defini le reader 
 		}
@@ -351,15 +361,36 @@ export class BuildingComponent implements OnInit {
 	  
 	  if(this.selectedReader){//si il y a un reader selectionne, il faut reset ses valeurs (couleurs , ...)
 	  
+		  d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');
 		  //set couleur par defaut
 		  this.selectedReader.setAttribute('fill', '#81DAF5');
 		  
 		  //set position de base de l'element 		  
-			/*CODE COPIER-COLLER EPUTE METTRE DANS FUNCTION*/
-		  var oldPost = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex]; 
-		  this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex].id_space = this.spaceIndex; 
+		
+
+
+		  
+		  
+		  var oldParent = this.selectedReader.parentNode;		
+		  var newParent = document.getElementById("g"+this.spaceIndex); // get l'ancien parent pour le relier a celui -ci
+		 
+		
+		
+		
+		//remove 
+		oldParent.removeChild(this.selectedReader);
+		
+		//add 
+		 var oldPost = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex]; 		  
 		  this.selectedReader.setAttribute('cx',oldPost.x);
-		  this.selectedReader.setAttribute('cy',oldPost.y);		  
+		  this.selectedReader.setAttribute('cy',oldPost.y);	
+		  
+		newParent.appendChild(this.selectedReader)
+		
+		
+		
+		
+		  
 		  
 		  d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');
 		   //set event drag à null
