@@ -368,17 +368,20 @@ export class BuildingComponent implements OnInit {
 	  
 	  this.selectedReader = circleSelect;	  
 	  
-	  this.spaceIndex = circleSelect.parentNode.id.match(/[0-9]+/g)[0]; 	// id est creer de facon a contenir index del4espaces dasn la variable 
+	  this.spaceIndex = circleSelect.parentNode.id.match(/[0-9]+/g)[0]; 
+console.log(this.spaceIndex);	  // id est creer de facon a contenir index del4espaces dasn la variable 
 	  this.readerIndex = circleSelect.id.match(/[0-9]+/g)[0];   			//global contenant les données donc j'en extrait uniqumene tl'index
-	  
+	  console.log(this.readerIndex);
 	  this.selectedReader.setAttribute('fill', '#00FE08');
 	  
 	  //garnit la variable d'update du reader ***
 	  var data_readerSelected = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex];
+	  console.log(data_readerSelected);
 	  
+	  this.readerUpdate.id_space = data_readerSelected.id_space;  //***
 	  this.readerUpdate.id_reader = data_readerSelected.id_reader; //***
 	  this.readerUpdate.reference = data_readerSelected.reference; //***
-	  this.readerUpdate.id_space = data_readerSelected.id_space;  //***
+	  console.log(this.readerUpdate);
 	  
 	  d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', '#E2C7EA'); 	  
 	  d3.select(circleSelect).call(d3.drag().on("drag",function(){self.dragReader(this)}))
@@ -386,14 +389,22 @@ export class BuildingComponent implements OnInit {
   }
    
    ConfirmUpdateReader(){
+	   /*//modif sans var intermetiaire
 	   var reader = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex];
 	   
 	   reader.fixed = false;	   
 	   reader.x = this.selectedReader.getAttribute('cx');
 	   reader.y = this.selectedReader.getAttribute('cy');
+	     console.log(reader);*/
+		 
+	   //modif avec var intermetiaire
+	   this.readerUpdate.x = this.selectedReader.getAttribute('cx');
+	   this.readerUpdate.y = this.selectedReader.getAttribute('cy');
+	   this.readerUpdate.fixed = false;
 	   
-	   console.log(reader);
-	   this.readerService.updateReader(reader).subscribe(
+	 console.log(this.readerUpdate);
+	 
+	   this.readerService.updateReader(this.readerUpdate).subscribe(
 			() => {console.log("ok");
 			  this.initPage();  },
 		  (err:any) => console.error(err) 
