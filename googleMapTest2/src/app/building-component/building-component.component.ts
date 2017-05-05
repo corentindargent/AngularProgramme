@@ -3,7 +3,6 @@ import { Component, OnInit, ViewChild, ElementRef,Input } from '@angular/core';
 import { ActivatedRoute, Params }   from '@angular/router';
 import 'rxjs/add/operator/switchMap';
 import { Location }                 from '@angular/common';
- 
 
  
 import { BuildingService } from '../building.service';
@@ -13,49 +12,56 @@ import { ReaderService } from '../reader.service';
 import { Building,Floor,Space,Reader } from '../model'
 import * as d3 from 'd3';
 
+
+
 @Component({
   selector: 'building-component',
   templateUrl: './building-component.component.html',
   styleUrls: ['./building-component.component.css']
 })
+
 export class BuildingComponent implements OnInit {
 
   @ViewChild('svg') svgRef: ElementRef;
   svg :any;
-  test: any;
+  svgNoeud: any;
   
-  private building_data : Building;
-  private buildingId : number;
-  private currentFloor : Floor;
+  private building_data : Building; // contiendra les données du batiment recuperer dasn les services
+  private buildingId : number;// id du batiment passer en argument dans url de la page
+  private currentFloor : Floor;//etage actuellement affiché
+  
   private selectedSpace : any = null;
   basicView : boolean;//affiche form html
   
   //VAR DRAWNG SVG
-  pointsPolygon : Array<any>;
+  pointsPolygon : Array<any>; // les points de la forme du nouvel espace
   drawing : boolean = false;
   
  //VAR - CREATE NEW FLOOR/SPACE/READER  
-	  @Input() newFloor : Floor; 
+ 
+	  @Input() newFloor : Floor; // var lié au form ajout new floor
 	  isANewFloor : boolean = false; //affiche form html
 	  
-	  @Input() newSpace : Space;  
+	  @Input() newSpace : Space;  // var lié au form ajout new Space
 	  isANewSpace : boolean = false; //affiche form html
 	  errorMessage : string;
 	  formeSpace : Array<any>;
 	  floorId : number;  
 	  
-	  @Input() newReader : Reader;
+	  @Input() newReader : Reader; // var lié au form ajout new Reader
 	  isANewReader : boolean = false; //affiche form html
 	  lastSelectedSpace  : any;
+	  shapeNewReader : any; // forme shape reader
 
    
   //VAR - MODIFICATION SPACES  
     UpdateSpace : boolean = false;  
-
+    @Input() spaceUpdate : Space = new Space();
+	
   //VAR - MODIFICATION POS READER
 	  selectedReader : any;
-	  private spaceIndex : any;
-	  private readerIndex : any;
+	  private spaceIndex : any; // indice de l'espace dans du reader dans var de donnéés
+	  private readerIndex : any; // indice du reader selectionne dans var de donnéés
 	  UpdateReader : boolean = false;
 	  spaceOfReader : any;
 	  @Input() readerUpdate : Reader = new Reader();//***
@@ -78,17 +84,15 @@ export class BuildingComponent implements OnInit {
   }
   
   initPage(){
+	  
 	  this.building_data = new Building();
-	  console.log(this.buildingId);
-	 this.buildingService.getDataOfABuild(this.buildingId)
+	  
+	 this.buildingService.getDataOfABuild(this.buildingId) // recupere les données d'un batiment via son id
     .subscribe(
 		(building : Building )  => {
-			this.building_data = building;
-			console.log(this.building_data);
-			//if(this.building_data.listFloor[0]){this.isThereAFloor = true;}			
-			
-			this.test = document.getElementById('svg');
-			this.initPolygon();
+			this.building_data = building;			
+			this.svgNoeud = document.getElementById('svg');
+			this.initPolygon();// init processus d'edition forme de l'etage du batiment
 		},
 		(err:any) => {console.error(err); console.log(err.body)}
 	);
@@ -96,32 +100,45 @@ export class BuildingComponent implements OnInit {
   }
   
   
-  /*A changer/ modifier --
-			pour le moment permet de garder coherent HTML ne pas avoir tous les formulaires d'ajout de nouvel element à la fois
-			et retire les events lies a la creation de telles ou telles instances 
-  */
+  /* /reste html et retire les eventuels lsitener en fct de la derniere operation qui a eu lieu
+   */
   resetHtml(){
 	
 	var g = d3.select('g');//get le 1st g comprenant la forme de l'étage
 	var gChild = g.selectAll('g');//get tous les g (où un g == 1 space) de c comprenant la forme de l'étage
 	gChild.select('polygon').on('click',null);
 	
-	this.isANewReader = false;
+	
 	
 	if(this.basicView){
+		}
 		
 	  gChild.on("mouseover",null)
 			.on("mouseout",null)
 			.on("click",null);
 		this.basicView = false;
+		
+	gChild.selectAll("circle").on("click",null);//retire event sur reader
+	
+	/*//si derniere operation ajout reader
+		il faut cahcer le fromaualire; retirer le reader 
+		et set a dafaut la couleur du polygone
+	*/
+	if(this.isANewReader){
+		
+		this.isANewReader = false;
+		this.lastSelectedSpace.setAttribute('fill', 'red');
+		this.shapeNewReader.remove();//retire le cercle
 	}
 	
+	//si derniere operation ajout space retirer les listener
 	if(this.isANewSpace) {
 		this.isANewSpace = false;
 		g.on("mouseup",null)
 		g.on("mousemove",null);
 	}
 	
+	//si derniere operation ajout floor -> enelever form + redessiner le 1er etage
 	if(this.isANewFloor){
 	  this.isANewFloor = false;
 	  this.drawFloor(this.building_data.listFloor[0]);
@@ -143,7 +160,7 @@ export class BuildingComponent implements OnInit {
 			
 			var circles = d3.select("#g"+index).selectAll('circle.circle-handler');//pour recupere uniqument les cerlces du polygon qui ne sont pas des readers 
 			circles.remove();
-			this.selectedSpace.setAttribute("points",this.ArrayToSvgPath(this.currentFloor.listSpaces[index].polygon));
+			this.selectedSpace.setAttribute("points",this.arrayToSvgPath(this.currentFloor.listSpaces[index].polygon));
 		}
 		this.UpdateSpace = false;
 		this.initPage();
@@ -179,51 +196,50 @@ export class BuildingComponent implements OnInit {
   
   initPolygon(){
 	  
-		if(this.building_data.listFloor[0])
+		if(this.building_data.listFloor[0])// si le batiment comprend etage 
 		{
-			// ETAGE EXISTANT
-			console.log(this.building_data.listFloor[0]);
-			this.drawFloor(this.building_data.listFloor[0]);
+			this.drawFloor(this.building_data.listFloor[0]);// dessine la forme de l'etage
 		}
 		else
 		{
-			console.log("Premiere fois ici");
-			this.init();					
+			this.init();	// on dessine la forme du batiment (avec une conversion COORD GOOGLEMAPS en XY SVG)				
 		} 
   }
   
-  // LORS CE QU4IL AURA DES ETAGES VOIR COMMENT LE SINTEGRE SVG
+  // Dessine un etage donné
   drawFloor(floor : Floor){	 
   
-	//ajout - ACTIVation BOUTON CREATION ESPACE
-	  this.currentFloor = floor;
-	  this.floorId = floor.id_floor;
-	  console.log("Current Floor "+ floor.id_floor);
+	//ajout - ACTIVation BOUTON CREATION piece
 	
-	  
+	  this.currentFloor = floor;
+	  this.floorId = floor.id_floor;//conserve l'id de l'etage necessaire lors de l'ajout d'une pièce
+	  this.selectedSpace = null;
+      this.selectedReader = null;
+
+	//Dessiner les elelemnst de l'etage (sa forme, ses pièces et les readers)
+	
 	  var svg = d3.select('svg');
-	  //retire le g et ses enfants de l'arborescence
-	  var g = svg.select('g');
-	  g.remove();
+	  
+	  //set le svg a  vide
+		svg.select('g').remove();
 	  
 	  
-	    //version d3
- var g =  svg.append('g').attr('id', 'g');
+	  
+	  //dessiner la forme global de l'etage
+	 var g =  svg.append('g').attr('id', 'g'); 
+	 var polygon = g.append('polygon')
+			.attr('id', 'poly')
+			.attr('stroke', 'black')
+			.attr('stroke-width', '4')
+			.attr('fill', 'white')
+			.attr('stroke', 'black')
+			.attr("points", this.arrayToSvgPath(floor.polygon))//conversion 
  
- 
- var polygon = g.append('polygon')
-		.attr('id', 'poly')
-		.attr('stroke', 'black')
-		.attr('stroke-width', '4')
-		.attr('fill', 'white')
-		.attr('stroke', 'black')
-		.attr("points", this.ArrayToSvgPath(floor.polygon))
- 
-	    /* POLYGON espaces */
-	   //var g_spaces = document.createElementNS("http://www.w3.org/2000/svg", 'g');  
+	    
 	   
+	  /* Dessin la forme des pièces et des étages */ 
 	   var self =this;	 
-	   self.basicView = true;  
+	   //self.basicView = true;   visible un tableau  selection espace
 	  floor.listSpaces.forEach(function(element,index)
 	   {
 		  
@@ -231,7 +247,7 @@ export class BuildingComponent implements OnInit {
 				.attr('id', "g"+index);
 				
 			var polygonSpace = g_space.append('polygon')
-				.attr("points", self.ArrayToSvgPath(element.polygon))
+				.attr("points", self.arrayToSvgPath(element.polygon))
 				.attr('id', ""+index)
 				.attr('stroke-width', '2')
 				.attr('stroke', 'black')
@@ -240,12 +256,10 @@ export class BuildingComponent implements OnInit {
 				//.on("mouseout",function(){this.setAttribute('fill', 'red');self.selectedSpace = null;})
 				.on('click',function(){self.editShapesOfSpace(this)})
 			
-				element.listReaders.forEach(function(element,index)
+				element.listReaders.forEach(function(element,index)//dessine les readers de l'espace
 				{
 					  
 					   console.log(element);
-					  
-							
 						var circle = g_space.append('circle')
 							.attr("cx", element.x)
 							.attr("cy", element.y)
@@ -253,12 +267,11 @@ export class BuildingComponent implements OnInit {
 							.attr('fill', '#81DAF5')
 							.attr('stroke', 'black')
 							.attr('is-handle', 'true')
-							.attr('id',"Reader"+index+"OfSpace"+element.id_space) /* id assez long pour permettre d'avoir un id unique car utilisation selectByIdn
+							.attr('id',"Reader"+index+"OfSpace"+element.id_space) 
+							/* id assez long pour permettre d'avoir un id unique car utilisation selectByIdn
 							
 							peut etre retirer simplifie etant dnne que l'on applique event directement sur l'element clique */
-							
-							//.call(d3.drag().on("drag",function(){self.dragReader(this)}))
-				            .on("click",function(){self.updatePosReader(this)})
+							.on("click",function(){self.updatePosReader(this)})
 				});
 	   
 	   });
@@ -274,24 +287,21 @@ export class BuildingComponent implements OnInit {
   updateSpaces(){
 	  this.resetHtml();
 	  var self = this;
-	 var g = d3.select('g');//get le 1st g comprenant la forme de l'étage
-	 var gChild = g.selectAll('g');//get tous les g comprenant les espaces
-	  gChild.selectAll('polygon').on('click',function(){self.editShapesOfSpace(this)})
+	  var g = d3.select('g');//recupere l'element svg 'g' comprenant la forme general de l'étage
+	  var gChild = g.selectAll('g');//recupere tous les elements svg 'g' comprenant chacun une pièce
+	  gChild.selectAll('polygon').on('click',function(){self.editShapesOfSpace(this)})//on associe à la forme(==polygon) des pièces un event click
   }
   
-  ConfirmUpdateSpace(){
+  //bouton confirmation update
+  confirmUpdateSpace(){
 	  
-	  //garnit l'espace modifie en rajoutant le polygon, la posX et la posY.
-	  var espaceModifier = this.currentFloor.listSpaces[this.selectedSpace.id];
-	 
+	  this.spaceUpdate.polygon = this.selectedSpace.points;
+	  this.spaceUpdate.x = this.selectedSpace.points[0].x;
+	  this.spaceUpdate.y = this.selectedSpace.points[0].y;
+	  this.spaceUpdate.id_floor = this.floorId;
 	  
-	  espaceModifier.polygon = this.selectedSpace.points;
-	  espaceModifier.x = this.selectedSpace.points[0].x;
-	  espaceModifier.y = this.selectedSpace.points[0].y;
-	  
-	  
-	  
-	  this.spaceService.updateSpace(espaceModifier).subscribe(
+	  console.log(this.spaceUpdate);
+	  this.spaceService.updateSpace(this.spaceUpdate).subscribe(
 			floor => {console.log('create new floor'+floor);
 			 this.initPage(); },
 		  (err:any) => console.error(err) 
@@ -308,7 +318,8 @@ export class BuildingComponent implements OnInit {
 		  return;
 	  }
 	  
-  this.UpdateSpace = true;
+    this.UpdateSpace = true;//set visible formaulaire
+	
 	 if(this.selectedSpace)//si qq chose stocke, set le dernier selectionner a defaut
 	 {
 		var index = this.selectedSpace.id;
@@ -316,15 +327,21 @@ export class BuildingComponent implements OnInit {
 		
 		var circles = d3.select("#g"+index).selectAll('circle.circle-handler');//pour recupere uniqument les cerlces du polygon qui ne sont pas des readers 
 		circles.remove();
-		this.selectedSpace.setAttribute("points",this.ArrayToSvgPath(this.currentFloor.listSpaces[index].polygon));
+		this.selectedSpace.setAttribute("points",this.arrayToSvgPath(this.currentFloor.listSpaces[index].polygon));
 	 }
 	 
 	this.selectedSpace = polygon;
 	this.selectedSpace.setAttribute('fill', '#00FE08');
-  
-      console.log(polygon.id);
+	
+	 //garnit la varaible d'update avec les info du polygon selectionne
+	this.spaceUpdate.reference = this.currentFloor.listSpaces[this.selectedSpace.id].reference;
+    this.spaceUpdate.id_space = this.currentFloor.listSpaces[this.selectedSpace.id].id_space;
+	
+	 
 	  var self = this;
 	  
+	  //ajout au polygon selection des cerlce a ses poiints
+	  //cerlce qui permettraont d'editer laforme du polygon
 	  var parentNode = d3.select("#g"+polygon.id);
 	  console.log(parentNode);
 	  
@@ -345,80 +362,74 @@ export class BuildingComponent implements OnInit {
  
  
  
-   /* UPDATE POS READER */
+ 
+ 
+   /* UPDATE position READER */
    
    updatePosReader(circleSelect : any){
 	  
-		
-	   if(this.UpdateSpace){//Si on est en train de modifier un espace il faut bloquer l'update d'un reader la position d'un reader
+		//Si on modifie deja un espace on bloque la modif du reader
+	   if(this.UpdateSpace){
 		   return;
 	   }
 	  
-	   if(this.selectedReader == circleSelect){return} //le circleSelect est identique au dernier reader selectionne donc quitte fct
+	  //le circleSelect est identique au dernier reader selectionne donc quitte fct
+	   if(this.selectedReader == circleSelect){return;} 
 	  
 	  var self = this;	//conserver le contexte Angular
 	  this.UpdateReader = true; //rendre visible le form html
 	  
-	  if(this.selectedReader){//si il y a un reader selectionne, il faut reset ses valeurs (couleurs , ...)
 	  
+	  //si il y a un reader selectionne et dont la modification n'est pas confirmee, il faut reset ses valeurs (couleurs , ...)
+	  if(this.selectedReader){
+	  
+	    //set couleur de base a l'espace contenant le reader
 		  d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');
-		  //set couleur par defaut
+		  
+		//remet la couleur par defaut au reader
 		  this.selectedReader.setAttribute('fill', '#81DAF5');
 		  
-		  //set position de base de l'element 		  
-		
-
-
-		  
-		  
+	    //on reassocie le reader a son pere de depart ("la piece") 
 		  var oldParent = this.selectedReader.parentNode;		
 		  var newParent = document.getElementById("g"+this.spaceIndex); // get l'ancien parent pour le relier a celui -ci
 		 
-		
-		
-		
-		//remove 
-		oldParent.removeChild(this.selectedReader);
-		
-		//add 
-		 var oldPost = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex]; 		  
-		  this.selectedReader.setAttribute('cx',oldPost.x);
-		  this.selectedReader.setAttribute('cy',oldPost.y);	
-		  
-		newParent.appendChild(this.selectedReader)
-		
-		
-		
-		
-		  
-		  
-		  d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');
-		   //set event drag à null
-		  d3.select(this.selectedReader).call(d3.drag().on("drag",null))		  
+			//remove 
+			oldParent.removeChild(this.selectedReader);
+			
+			//add 
+			newParent.appendChild(this.selectedReader);
+			
+		//reset position de depart au reader
+		  var DefautPostistion = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex]; 		  
+		  this.selectedReader.setAttribute('cx',DefautPostistion.x);
+		  this.selectedReader.setAttribute('cy',DefautPostistion.y);	
+		 
+		// remove l'eventlistener (handleDrag du reader)  		
+		  d3.select(this.selectedReader).call(d3.drag().on("drag",null));
+		 	  
 	  }
 	  
-	  this.selectedReader = circleSelect;	  
+	  this.selectedReader = circleSelect; // conserve le reader selectionne
 	  
-	  this.spaceIndex = circleSelect.parentNode.id.match(/[0-9]+/g)[0]; 
-console.log(this.spaceIndex);	  // id est creer de facon a contenir index del4espaces dasn la variable 
-	  this.readerIndex = circleSelect.id.match(/[0-9]+/g)[0];   			//global contenant les données donc j'en extrait uniqumene tl'index
-	  console.log(this.readerIndex);
-	  this.selectedReader.setAttribute('fill', '#00FE08');
+	  this.spaceIndex = circleSelect.parentNode.id.match(/[0-9]+/g)[0]; //l'index de l'espace dans la tablea des espaces (variable de données) 
+  
+	  this.readerIndex = circleSelect.id.match(/[0-9]+/g)[0]; //get l'index du reader selectionne dans listeReaders (variable de données)  			
 	  
-	  //garnit la variable d'update du reader ***
-	  var data_readerSelected = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex];
-	  console.log(data_readerSelected);
+	  this.selectedReader.setAttribute('fill', '#00FE08');//change la couleur du reader selectionne
 	  
-	  this.readerUpdate.id_space = data_readerSelected.id_space;  //***
-	  this.readerUpdate.id_reader = data_readerSelected.id_reader; //***
-	  this.readerUpdate.reference = data_readerSelected.reference; //***
-	  console.log(this.readerUpdate);
+	  //GARNIT LA VARIABLE D'UPDATE DU READER ***
 	  
-	  d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', '#E2C7EA'); 	  
-	  d3.select(circleSelect).call(d3.drag().on("drag",function(){self.dragReader(this)}))
+	   var data_readerSelected = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex];//get les données du reader selcetionne via les index (space,reader)
+	   this.readerUpdate.id_space = data_readerSelected.id_space;  //***
+	   this.readerUpdate.id_reader = data_readerSelected.id_reader; //***
+	   this.readerUpdate.reference = data_readerSelected.reference; //***
+	   
+	  d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', '#E2C7EA');//set la couleur de la pièce contenant le reader 	  
+	  d3.select(circleSelect).call(d3.drag().on("drag",function(){self.dragReader(this)}))//associe event drag au reader selectionne
 	  
   }
    
+   //Bouton confirmation des changement fait
    ConfirmUpdateReader(){
 	   /*//modif sans var intermetiaire
 	   var reader = this.currentFloor.listSpaces[this.spaceIndex].listReaders[this.readerIndex];
@@ -428,65 +439,68 @@ console.log(this.spaceIndex);	  // id est creer de facon a contenir index del4es
 	   reader.y = this.selectedReader.getAttribute('cy');
 	     console.log(reader);*/
 		 
-	   //modif avec var intermetiaire
+	   //garnit notre var d'update (post x, post y, set boolean false)
 	   this.readerUpdate.x = this.selectedReader.getAttribute('cx');
 	   this.readerUpdate.y = this.selectedReader.getAttribute('cy');
 	   this.readerUpdate.fixed = false;
 	   
-	 console.log(this.readerUpdate);
-	 
+	   //Opere la modification
 	   this.readerService.updateReader(this.readerUpdate).subscribe(
 			() => {console.log("ok");
 			  this.initPage();  },
 		  (err:any) => console.error(err) 
 		  ); 
 		  
+		  //retire le formualire, enleve le listener et set les couleurs par defaut
 		  this.UpdateReader = false;
 		  d3.select(this.selectedReader).call(d3.drag().on("drag",null));
-		  this.selectedReader.setAttribute('fill', '#81DAF5');
+		  d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');
+		  this.selectedReader.setAttribute('fill', '#81DAF5');		  
    }
    
-   
-   //handle forme Reader
-	 dragReader(circleSelect : any){	 
-				 
+      //handle forme Reader
+	dragReader(circleSelect : any){	 
+		
+		//set la new pos du reader
 	   var dragCircle = d3.select(circleSelect), newPoints = [], circle;
 		dragCircle
 		.attr('cx', d3.event.x)
-		.attr('cy', d3.event.y);
-			
+		.attr('cy', d3.event.y);			
 	}
    
-   
-    moveReader(index : number)
-	{
-		//Set les couleurs de l'ancine et du nouveua parent
-		d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');	
-		d3.select("#g"+index).select("polygon").attr('fill', '#E2C7EA');	
+    // lie le reader a une autre piece
+    moveReader(index : number){
 		
+		//Set les couleurs de l'ancien (couleur defaut) et du nouveau parent (couleur selection)
+		  d3.select(this.selectedReader.parentNode).select("polygon").attr('fill', 'red');	
+		  d3.select("#g"+index).select("polygon").attr('fill', '#E2C7EA');	
+		
+		//Change les parents (D.O.M) du reader
 		var oldParent = this.selectedReader.parentNode;		
 		var newParent = document.getElementById("g"+index);
 		
 		//remove 
-		oldParent.removeChild(this.selectedReader);
+		  oldParent.removeChild(this.selectedReader);
 		
 		//add 
-		var polygon = newParent.getElementsByTagName('polygon')[0];//recupere le polygon du nouvel espace pour placer le reader dasn son "périmètre"
-			
-		this.selectedReader.setAttribute('cx',polygon.points[0].x);
-	    this.selectedReader.setAttribute('cy',polygon.points[0].y);
 		
-		newParent.appendChild(this.selectedReader)
+			//recupere le polygon du nouvel espace pour placer le reader dasn son "périmètre"
+		  var polygon = newParent.getElementsByTagName('polygon')[0];			
+		  this.selectedReader.setAttribute('cx',polygon.points[0].x);
+		  this.selectedReader.setAttribute('cy',polygon.points[0].y);	
+		  newParent.appendChild(this.selectedReader)
 		
-		this.readerUpdate.id_space = this.currentFloor.listSpaces[index].id_space;//getId psace du nouvel espace du reader
-		
-		
+		   // on associe a la variable d'update du reader le nouvel espace
+		  this.readerUpdate.id_space = this.currentFloor.listSpaces[index].id_space;	
 	}
    
-    //handle forme Space
-  handleDrag(circleSelect : any) {    
-    var dragCircle = d3.select(circleSelect), newPoints = [], circle;
-	
+   
+   
+   //UPDATE SPACE
+    //event de mouvoir la polygon d'un espace 
+  handleDrag(circleSelect : any) {  
+  
+    var dragCircle = d3.select(circleSelect), newPoints = [], circle;	
 	var circles1 = circleSelect.parentNode.getElementsByClassName("circle-handler");
 	var poly1 = circleSelect.parentNode.getElementsByTagName('polygon')[0];
 	
@@ -494,22 +508,18 @@ console.log(this.spaceIndex);	  // id est creer de facon a contenir index del4es
     .attr('cx', d3.event.x)
     .attr('cy', d3.event.y);
 	
-	
-    for (var i = 0; i < circles1.length; i++) {
-		
+	//boulce pour recuperer les points du polygon
+    for (var i = 0; i < circles1.length; i++) {		
         newPoints.push([circles1[i].cx.baseVal.value, circles1[i].cy.baseVal.value]);		
-	}	
-    poly1.setAttribute('points', newPoints);
+	}
 	
-   }
+    poly1.setAttribute('points', newPoints);//set la nouvelle forme de l'espace
+	
+  }  
   
+  //permet de definir des cercles (avec listener) sur les points du polygon d'un espace selectionne
+  editPolygon(polygon : any){ 
   
-
-  
-  
-  
-  editPolygon(polygon : any)
-  { 
 	  var gr = polygon.parentNode;
 	 
 	  var g = d3.select('#gr.id');
@@ -526,21 +536,19 @@ console.log(this.spaceIndex);	  // id est creer de facon a contenir index del4es
 			.attr('stroke', '#000')
 			.attr('is-handle', 'true')
 			.style({cursor: 'move'})
-			//.call(dragger);	***		
 			console.log(circle);
-		}		
-			
+		}			
   }
-  
-  
-  ArrayToSvgPath(arrayPolygon : Array<any>):any{ //il y a 1 erreur lors associe directement 
+ 
+
+  arrayToSvgPath(arrayPolygon : Array<any>):any{ //il y a 1 erreur lors associe directement 
 	 
     var svgPath = new Array();
    
         for (var i = 0; i < arrayPolygon.length; ++i) {
             var point = arrayPolygon[i];
             svgPath.push([arrayPolygon[i].lat, arrayPolygon[i].lng].join(','));
-        }                 
+        }                
 	  
 	  return svgPath;
   }
@@ -548,32 +556,38 @@ console.log(this.spaceIndex);	  // id est creer de facon a contenir index del4es
   
     //__ NEW READER __
 	
-  createNewReader(){	  
+  createNewReader(){	
+  
 	this.resetHtml();
-	this.isANewReader = true;
+	this.isANewReader = true;//set visible le form d'ajout
 	this.newReader = new Reader(); //var lie au formualire ajout
-	var self = this;
-	  
+	
+	var self = this;	  
 	  
 	var g = d3.select('g');
 	var gChild = g.selectAll('g').select('polygon')
-	.on("mouseover",null)
-	.on("mouseout",null)
-	.on("click",function(){self.addShapesOfNewReader(this)});
+	/* .on("mouseover",null)
+	.on("mouseout",null) */
+	.on("click",function(){self.addShapesOfNewReader(this)});//permet d'ajouter un reader lorsqu'on clic sur un espace
 		  
   }
-  
-  
-  //ajout du cercle representant le nouveau reader
-  addShapesOfNewReader(selected){
+    
+  //ajout du cercle representant le nouveau reader sur un espace
+  addShapesOfNewReader(selected){//selected represnete l'espace sur lequel l'ajout se fait
+	  var self = this;
 	  
+	  /*si le dernier espace selectionne == "nouveau espace" alors quitte
+	  if(selected == lastSelected){return;}*/
+	  
+	  /*si true; cela signifie qu'un reader est dessine (ajout non confirmee) sur un espace
+	   il faut donc suppirmer le reader de l'espace*/
 	  if(this.lastSelectedSpace)
 	  {
+		 this.shapeNewReader.remove();
+		 
 		  this.lastSelectedSpace.setAttribute('fill', 'red');
-		  var lastSelected = d3.select('#g'+this.lastSelectedSpace.id).select('circle');
-		  lastSelected.remove();
 	  }  
-		  
+		 
 	  
 	  selected.setAttribute('fill', '#00FE08');
 	  
@@ -588,18 +602,22 @@ console.log(this.spaceIndex);	  // id est creer de facon a contenir index del4es
 			.attr('fill', 'yellow')
 			.attr('stroke', 'black')
 			.attr('is-handle', 'true')
+			.call(d3.drag().on("drag",function(){self.dragReader(this)}))//associe event drag au reader selectionne
+       
+	   this.shapeNewReader = circle;
 			
 	   //Associe la pos x,y et id_space à la nouvelle instance Reader		
 	  this.newReader.x = d3.mouse(selected)[0];
 	  this.newReader.y = d3.mouse(selected)[1];
-	  this.newReader.id_space = this.currentFloor.listSpaces[selected.id].id_space; 
+	  
+	 this.newReader.id_space = this.currentFloor.listSpaces[selected.id].id_space; 
 	  
 	  
 	  this.lastSelectedSpace = selected; 
   }
   
-  
-  addNewReader(){
+  //Confirm AJoutReader
+  confirmAddNewReader(){
 	
 	if(this.newReader.id_space == -1)
 	{
@@ -608,17 +626,21 @@ console.log(this.spaceIndex);	  // id est creer de facon a contenir index del4es
 	else
 	{
 		this.errorMessage = "";
-		console.log(this.newReader);
+		this.newReader.x = this.shapeNewReader.attr('cx');
+		this.newReader.y = this.shapeNewReader.attr('cy');
+		
 		
 		this.readerService.addReader(this.newReader).subscribe(
 			floor => {console.log(floor);
 			  this.initPage();  },
 		  (err:any) => console.error(err) 
 		  ); 
-		  this.isANewReader = false;
+		  this.isANewReader = false; 
+		 // d3.select(this.shapeNewReader).call(d3.drag().on("drag",function(){self.dragReader(this)}));//on s'en faout init  svg
 	}
 	  
   }
+  
   
   
  //__ NEW FLOOR __
@@ -626,61 +648,56 @@ console.log(this.spaceIndex);	  // id est creer de facon a contenir index del4es
   createNewFloor(){
 	this.resetHtml();
 	
-	this.newFloor = new Floor();
+	this.newFloor = new Floor(); //variable binder au formaulaire ajout
 	this.newFloor.id_building = this.buildingId;
 	
-	if(this.building_data.listFloor[0])// si le batiment possede un etage, alors on set la forme du noueavu à un exsitant
+  //SI le batiment possede deja un etage, la forme du nouvel etage sera egal celui-ci
+	if(this.building_data.listFloor[0])
 	{
 		this.newFloor.polygon = this.building_data.listFloor[0].polygon;
 		this.drawFloor(this.newFloor);// dessiner le nouvel etage
-		console.log(this.newFloor.polygon[0]);
 	}
 	else// uniquement pour le premier étage d'un batiment
-	{
-		console.log("Le batiment ne possède pas encore d'etage");
-		console.log(this.building_data.listFloor[0]);		
-		
-		this.newFloor.polygon = this.getCoordinatesWithoutConsideringViewBox();
+	{	
+		/*methode permet de recupere la forme du batiment en appliquant le 0.0 du svg 
+		  et non le 0.0 du viewBox(== user system coordinates)*/
+	   this.newFloor.polygon = this.getCoordinatesWithoutConsideringViewBox();
 	}	
 	this.isANewFloor = true;
   }
   
-
-  
-    addNewFloor(){
+  //bouton confirmation de l'ajout etage
+	confirmAddNewFloor(){
 		this.isANewFloor = false;
 		
 		  this.floorService.addFloor(this.newFloor).subscribe(
 			floor => {console.log('create new floor'+floor);
 			 this.initPage(); },
 		  (err:any) => console.error(err) 
-		  ); 
-		  		 
+		  );  
 	}
 	
 	
+	
    //__ NEW SPACE __
-	addNewSpace(){
-		
-		  if(!this.formeSpace ){
-			  
+   
+   //bouton confirmation ajout space
+	confirmAddNewSpace(){		
+		  if(!this.formeSpace){	//si pas de aucune forme dessinée alors erreur	  
 			  this.errorMessage = "Veuillez tracer la forme de l'espace";
 		  }
 		  else
 		  {
-			  console.log("ADD");
-			
 				this.errorMessage = "";	
-					this.newSpace.polygon = this.pointsPolygon; 
-					this.newSpace.id_floor = this.floorId;
-					console.log(this.newSpace);
+				this.newSpace.polygon = this.pointsPolygon; 
+				this.newSpace.id_floor = this.floorId;
+								
 				this.spaceService.addSpace(this.newSpace).subscribe(
 					floor => {console.log('create new floor'+floor); this.initPage();},
 					(err:any) => console.error(err) 
 				); 
 		        this.pointsPolygon.splice(0);
 				this.isANewSpace = false;
-				
 		  }
 	}
   
@@ -695,7 +712,7 @@ console.log(this.spaceIndex);	  // id est creer de facon a contenir index del4es
 getCoordinatesWithoutConsideringViewBox():Array<any>{
 	
 	
-	var x = this.test;	
+	var x = this.svgNoeud;	
 	var viewPortWidth = x.width.baseVal.value;
 	var viewPortHeigth = x.height.baseVal.value;
 	
@@ -725,7 +742,8 @@ getCoordinatesWithoutConsideringViewBox():Array<any>{
 
 
 
-/* METHODE TRACAGE POLYGON EN SVG A PARTIR DE COORDONNES LATLNG de GOOGLE MAP */
+/* METHODE TRACAGE POLYGON EN SVG A PARTIR DE COORDONNES LATLNG de GOOGLE MAP
+		CONVERSION GOOGLE MAPS TO SVG */
 
  latLng2point(latLng) {
 
@@ -764,9 +782,6 @@ getCoordinatesWithoutConsideringViewBox():Array<any>{
 
 }
 
-
-
-
  drawPoly(node, props) {
 
    var svg = node.cloneNode(false);
@@ -786,7 +801,6 @@ getCoordinatesWithoutConsideringViewBox():Array<any>{
 	svg.setAttribute('viewBox', [props.x, props.y, props.width, props.height].join(' '));		
 }
 
-
  init() {    
 
     var svgProps = this.poly_gm2svg(this.building_data.polygon, function (latLng) {
@@ -798,9 +812,10 @@ getCoordinatesWithoutConsideringViewBox():Array<any>{
 	var node = this.svgRef;
 	var noued = document.getElementById("svg");
     this.drawPoly(noued, svgProps);
-	this.test = document.getElementById('svg');
+	this.svgNoeud = document.getElementById('svg');
 }
 
+/* -- FIN METHODE CONVERSION GOOGLE-MAPS TO SVG -- */
 
 
 
@@ -815,7 +830,7 @@ drawOnSvg(){
 	
 	this.svg = d3.select("g");
 	
-	var svg = 	this.svg;	//tester si retire
+	var svg = 	this.svg;	//svgNoeuder si retire
 	this.formeSpace = null;
 	this.isANewSpace = true;
 	this.newSpace = new Space();
@@ -927,6 +942,4 @@ this.svg.on('mousemove',  function() {
     return color;
 }
   
-  
-
 }

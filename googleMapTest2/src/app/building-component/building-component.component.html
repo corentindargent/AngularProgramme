@@ -173,7 +173,7 @@
 						  </div><!--/input adresse -->
 						  
 						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
-						  <button id="send" type="submit" (click)="addNewFloor()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+						  <button id="send" type="submit" (click)="confirmAddNewFloor()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
 						</form>
 					</div><!-- form site-->	
 				<!--/fin CREATION NEW FLOOR-->	
@@ -196,7 +196,7 @@
 						  </div> <!--/input Nom -->
 						  
 						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}	</div>			  
-						  <button id="send" type="submit" (click)="addNewSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+						  <button id="send" type="submit" (click)="confirmAddNewSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
 						</form>
 					</div><!-- form site-->	
 				<!--/fin CREATION NEW SPACE-->	
@@ -237,8 +237,23 @@
 						  </div><!--/input fixe -->
 							
 							
+							<div class="form-group"><!--SELCET space -->
+							<label for="space">Space:</label>
+							<select  #MacAddress="ngModel" class="form-control"  id="space" name="space" [(ngModel)]="newReader.id_space" disabled="disabled">
+								<option *ngFor="let space of currentFloor.listSpaces; let i = index;"
+								[value]="space.id_space"  required> {{space.id_space }} - {{ space.reference }}</option>							
+							</select>
+							<!-- <input disabled="disabled" #MacAddress="ngModel"  class="form-control required" id="space" required
+							[(ngModel)] = "currentFloor.listSpaces[spaceIndex].listReaders[readerIndex].id_space" name="space" /> -->
 						  
-						  <div class="form-group"><!--input space -->
+							<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
+							class="alert alert-danger validation-message"> Espace doit etre selectionne </p>
+							
+						  </div><!--/input space -->
+							
+							
+						  <!--INPUT space  -->
+						 <!--  <div class="form-group">
 							<label for="space">Space:</label>
 							<input disabled="disabled" #MacAddress="ngModel" type="text" class="form-control required" id="space" required
 							[(ngModel)] = "newReader.id_space" name="space" />
@@ -246,10 +261,10 @@
 							<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
 							class="alert alert-danger validation-message"> Numero de l'étage requis </p>
 							
-						  </div><!--/input space -->
+						  </div>--><!--/input space --> 
 						  
 						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
-						  <button id="send" type="submit" (click)="addNewReader()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+						  <button id="send" type="submit" (click)="confirmAddNewReader()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
 						</form>
 					</div><!-- form site-->	
 				<!--/fin CREATION NEW READER-->	
@@ -262,7 +277,7 @@
 							  <div class="form-group">
 								<label for="nomEspace">Reference:</label>
 								<input #name="ngModel" type="text" class="form-control"  id="nomEspace"
-									[(ngModel)] = "currentFloor.listSpaces[selectedSpace.id].reference" 	name="nomEspace"	
+									[(ngModel)] = "spaceUpdate.reference" 	name="nomEspace"	
 									required />
 									
 								<p *ngIf="name.control.hasError('required')&& (name.touched)"
@@ -271,23 +286,12 @@
 							  </div> <!--/input Nom -->
 							  
 							  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}	</div>			  
-							  <button id="send" type="submit" (click)="ConfirmUpdateSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+							  <button id="send" type="submit" (click)="confirmUpdateSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
 							</form>
 						</div>
 					</div>
 			   
 			   <!--/FORM MODIF SPACE-->
-			
-			
-		<!--
-				<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="currentFloor.listSpaces[spaceIndex].listReaders[readerIndex].id_space" >
-								<option *ngFor="let space of currentFloor.listSpaces"
-								[value]="space.site_id">Site : {{site.site_id }}</option>							
-							</select>
-		
-		
-		-->
-			
 			
 			<!--FORMUALIRE UPDATE READER-->
 				<div *ngIf="UpdateReader" >
