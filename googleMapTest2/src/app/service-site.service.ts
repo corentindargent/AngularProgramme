@@ -121,12 +121,14 @@ export class SiteService {
 		return	 tabCoordPolygon;	
   }
   
-  createJsonPolygon(listPoints : Array<any>):Array<any>
+  createJsonPolygon(listPoints : Array<any>, addNewInstance : boolean):Array<any>
   { 
     var tabJson = [];
 	for (var i = 0; i < listPoints.length; i++) {
 				var xy = listPoints[i];
-				tabJson.push({'x': xy.lat(),'y': xy.lng()});
+				
+					tabJson.push({'x': xy.lat(),'y': xy.lng()});
+				
 	}
 		return tabJson;
   }
@@ -138,7 +140,7 @@ export class SiteService {
     let options  = new RequestOptions({ headers: headers });	
 	
 	var cartesianPoints = [];	
-		cartesianPoints = this.createJsonPolygon(building.polygon);
+		cartesianPoints = this.createJsonPolygon(building.polygon,true);
 	var firstPoint =  building.polygon[0];	
 	
 	let body =
@@ -167,7 +169,7 @@ export class SiteService {
     let options  = new RequestOptions({ headers: headers });	
 	
 	var cartesianPoints = [];	
-		cartesianPoints = this.createJsonPolygon(building.polygon);
+		cartesianPoints = this.createJsonPolygon(building.polygon,true);
 		console.log(building.polygon[0]);
 	var firstPoint =  building.polygon[0];	
 	
@@ -197,7 +199,7 @@ export class SiteService {
 	let options  = new RequestOptions({ headers: headers });	
 
 	var cartesianPoints = [];
-		cartesianPoints = this.createJsonPolygon(site.polygon);
+		cartesianPoints = this.createJsonPolygon(site.polygon,true);
 		
 	var firstPoint =  site.polygon[0];
 
@@ -224,26 +226,30 @@ export class SiteService {
 	
 	updateSite(site: Site)
 	{
+		console.log(site);
+		console.log(site.polygon[0]);
 		let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
 		let options  = new RequestOptions({ headers: headers });
         
 		var cartesianPoints = [];
-		cartesianPoints = this.createJsonPolygon(site.polygon);
+		cartesianPoints = this.createJsonPolygon(site.polygon,false);
 		
 		var firstPoint =  site.polygon[0];
 		
 		
         let body = {
 			"site_id" : site.site_id,"address":site.address,"altitude":4.456,"reference":site.reference,"land_number":site.land_number,
-			"longitude":firstPoint.lng(),"cartesian":{"points":cartesianPoints},"latitude":firstPoint.lat()
+			"longitude":firstPoint.lng,"cartesian":{"points":cartesianPoints},"latitude":firstPoint.lat
 				
 		}
+		console.log(JSON.stringify(body));
+
 		 /*PUT PASSE PAS BLOQUER */
 		return this.http.post(this.baseUrl+'/site/update',body,options)
 			.map((response) => {
 				console.log('update result received in service:');
 			
-			return response/* .json() */;
+			return response;
 			})
 			.catch(SiteService.handleError);		
 	}

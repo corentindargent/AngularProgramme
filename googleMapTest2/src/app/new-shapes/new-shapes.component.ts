@@ -37,7 +37,7 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 	static polygon : google.maps.Polygon ;
 	static isASite : boolean;
 	errorMessage :string;
-	listePolygon : Array<any>;
+	listePolygonSite : Array<any>;
 	listePolygonBatiment : Array<any>;
 	polygonNonAffiche : boolean = true;
 	
@@ -49,6 +49,7 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 	modifSite : boolean = false;
 	modifBuilding : boolean = false;
 	@Input()selectedPolygon : number;
+	@Input()siteUpdate : Site = new Site();
 	lastSelected: number;
 	
 	
@@ -69,17 +70,8 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 			fillOpacity: 0.35,
 	};
 	
-	/*var de test*/
-	colorChange = "red";
-	
-	
-	
-	
-	
-	
     constructor(private gmapService: GMapService, private siteService: SiteService, private buildingService: BuildingService) { }
-    yop(){console.log("Tu veux un yop");}
-	
+
 	ngOnInit(){	
 	
 		/*GET all site and building*/
@@ -89,21 +81,15 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 				console.log("Array Site");				
 				this.sites_list = listeSite;
 			},
-			
-			(err:any) => {console.error(err); console.log(err.body)}
-			
-		);			
-			
+			(err:any) => {console.error(err); console.log(err.body)}			
+		);	
 	}
 	
 	
     ngAfterContentChecked(){ 
-	
 	 
 		if(this.gmapService.loadEnd && this.polygonNonAffiche)
 		{
-			console.log("after content init");
-			
 			if(this.sites_list)
 			{		 
 		        /*PEUT PAS UTILISER DIRECTEMENT LES VARIABLES DEFINIES DANS ANGULAR DOIT PASSER PAR DES ARRAY INTERMETIAIRE*/
@@ -140,16 +126,13 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 				}
 				
 				this.building_list = buildingList;
-				this.listePolygon = tabPolygonSite;
+				this.listePolygonSite = tabPolygonSite;
 				this.polygonNonAffiche = false;
 			}
 		}
 	}
-	/* ngAfterContentChecked() {
-    // contentChild is set after the content has been initialized
-	console.log("after content checked");   
-  } */
 	
+	//retire edition forme dans google map
 	 removeDrawingManager(){
 		let drawingManagerTest = this.gmapService.getDrawingManager();		
 		drawingManagerTest.setOptions({drawingControl: false,drawingMode: null});
@@ -167,11 +150,11 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 			this.modifSite=false;
 			
 			//Modification pas confirmer car user decider autre operation rest forme couleur et edition
-			this.listePolygon[this.lastSelected].setOptions({fillColor: '#00DE43'});
-			this.listePolygon[this.lastSelected].setOptions({editable:false });
+			this.listePolygonSite[this.lastSelected].setOptions({fillColor: '#00DE43'});
+			this.listePolygonSite[this.lastSelected].setOptions({editable:false });
 		
 			var path = this.sites_list[this.lastSelected].polygon;
-			this.listePolygon[this.lastSelected].setPath(path);
+			this.listePolygonSite[this.lastSelected].setPath(path);
 			
 		}
 		
@@ -183,36 +166,37 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 	}
 	
 	addPolygons(bool: boolean){//init processus creation site/batiment		
-		
-		NewShapesComponent.polygon = null;//set à null
-		NewShapesComponent.isASite = bool; // var permettant d'associer au ploygone creer les options du site / batiment
 		this.resetHTML();
+		
+		
+		NewShapesComponent.polygon = null;//set à null var qui contiendra polygon dessiné
+		NewShapesComponent.isASite = bool; // permet de savoir si ajout site/buildin pour associer les options de 'styles' au polygon
+		
+		this.setDrawingManager();
 		if(bool)//creation site
 		{
-			this.newSite = new Site();
-			console.log(this.newSite);
-			console.log(bool+"SIte");
-			this.setDrawingManager();		
-			this.isNewSite = bool;
+			this.newSite = new Site();					
+			this.isNewSite = true;
 		}
-		else
+		else//creation batiment
 		{
-			this.newBuilding = new Building();
-			this.setDrawingManager();		
-			this.isNewBuilding = !bool;
-			console.log(bool+"Batiment");
-			
+			this.newBuilding = new Building();					
+			this.isNewBuilding = true;
 		}		
 	}
 	
+	//asscocie boit d'edition de forme a la map google
 	setDrawingManager(){		
 		let drawingManagerTest = this.gmapService.getDrawingManager();		
 		drawingManagerTest.setOptions({drawingControl: true});
 		google.maps.event.addListener(drawingManagerTest, 'polygoncomplete', this.polygonCompleteEvent);
 	}
 	
-	addNewBuilding(){
+	//confirm ajout new building
+	confirmAddNewBuilding(){
+		
 		console.log(this.newBuilding.site_id);
+		
 		if(this.newBuilding.site_id != -1){
 			if(!NewShapesComponent.polygon)
 			{
@@ -222,8 +206,9 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 				
 				this.errorMessage = "";		
 				console.log(this.newBuilding.site_id);
+				
 				this.newBuilding.polygon = NewShapesComponent.polygon.getPath().getArray();
-						
+				
 				/*APPEL SERVICE CREATION BUILDING*/
 					this.buildingService.addBuilding(this.newBuilding).subscribe(
 						building => {console.log('create result received:');console.log(building);},
@@ -233,14 +218,15 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 				this.isNewBuilding = false;//PRESENT DANS METHODE RESETHTML PEUT SUPP
 				this.removeDrawingManager();	//RETIRE OUTIL GOOGLE MAPS D' EDITION DES FORMES		
 			}
-		}else{
+		}
+		else{
+			
 			this.errorMessage = "Veuillez selectionner un site";
 		}
 	}
-		
 	
-	
-	addNewSite(){
+		//confirm ajout new site
+	confirmAddNewSite(){
 		
 		if(!NewShapesComponent.polygon)
 		{
@@ -258,34 +244,25 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 					);
 					
 				this.isNewSite = false; //PRESENT DANS METHODE RESETHTML PEUT SUPP
-			
-			
-			 
 			this.removeDrawingManager();	//RETIRE OUTIL GOOGLE MAPS D' EDITION DES FORMES		
 		}
 		
 	}
 	
 	
-	
+	//event declenche qd cloture la forme d'un polygon
 	polygonCompleteEvent(newPolygon){		 
 		  
-	    if(NewShapesComponent.polygon){
-			
-			newPolygon.setMap(null);
-			
+	    if(NewShapesComponent.polygon){	//si deja une nouvelle forme qui est dessiné on set à null	
+			newPolygon.setMap(null);			
 		}		
 		else
 		{	var confirmBox = confirm("Valider-vous la forme créée");
 			if(confirmBox)
 			{
-				console.log("Forme Confirmée");
-				
 				NewShapesComponent.polygon = newPolygon;
-				/*console.log("Nw polygon "+newPolygon);				
-				console.log(newPolygon);				
-				console.log("NewShapesComponent "+NewShapesComponent.polygon);	
-				console.log(NewShapesComponent.polygon);*/
+				
+				//associe les couleurs de style selon creation site ou batiment
 				if(NewShapesComponent.isASite)
 				{
 					newPolygon.setOptions(NewShapesComponent.listOptionsPolygonsSite);					
@@ -293,21 +270,13 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 				else
 				{
 					newPolygon.setOptions(NewShapesComponent.listOptionsPolygonsBuilding);
-				}				
-					
-					//retire option de dessin
-				
+				}	
 			}
 			else
 			{
-				console.log("supp");
 				newPolygon.setMap(null);
-				//set NewShapesComponent.polygon qd ajout effectue ou 
 				NewShapesComponent.polygon=null;
-				
-				//*peut etre autre cinfrim box -> si oui continue edtion du polygone, si non retourne page accueil */
 				alert("Vous pouvez redessiner la forme");
-				
 			}
 		}
 	}
@@ -315,24 +284,23 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 	
 	onSelectSite(index : number)
     {
-		console.log("Dernier Select :"+ this.lastSelected);
 		
 		/* REST DERNIER SITE SELECTIONNE (COULEUR,EDITABLE et forme de base)*/
-		this.listePolygon[this.lastSelected].setOptions({fillColor: '#00DE43'});
-		this.listePolygon[this.lastSelected].setOptions({editable:false });
+		this.listePolygonSite[this.lastSelected].setOptions({fillColor: '#00DE43'});
+		this.listePolygonSite[this.lastSelected].setOptions({editable:false });
 		
 		var path = this.sites_list[this.lastSelected].polygon;
-		this.listePolygon[this.lastSelected].setPath(path);
-		
-		
+		this.listePolygonSite[this.lastSelected].setPath(path);
 		
 		
 		/* NOUVEAU SELECTIONNE */
         this.lastSelected = index;
-		this.listePolygon[this.lastSelected].setOptions({fillColor:"#EEFE0B"});
-		this.listePolygon[this.lastSelected].setOptions({editable:true });
+		this.listePolygonSite[this.lastSelected].setOptions({fillColor:"#EEFE0B"});
+		this.listePolygonSite[this.lastSelected].setOptions({editable:true });
 		console.log("Dernier Select (apres modif) :"+ this.lastSelected);
 		
+		this.siteUpdate.reference =  this.sites_list[this.lastSelected].reference;
+		this.siteUpdate.site_id = this.sites_list[this.lastSelected].site_id;
 	}
 	
 	modificationSite()	
@@ -342,31 +310,23 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		this.modifSite = true;
 		this.selectedPolygon = 0; // par defaut le premier element sera selectionne
 		
-			//this.listePolygon = this.sites_list;
-		console.log(this.listePolygon);
 		this.lastSelected = this.selectedPolygon;
-		this.listePolygon[this.lastSelected].setOptions({fillColor:"#EEFE0B",editable:true})
+		this.listePolygonSite[this.lastSelected].setOptions({fillColor:"#EEFE0B",editable:true});
 		
-		//google.maps.event.addListener(,"click",function(){console.log("modf");this.setOptions({fillColor:"#EEFE0B"});});	
-	}
+		this.siteUpdate.reference =  this.sites_list[this.lastSelected].reference;
+		this.siteUpdate.site_id = this.sites_list[this.lastSelected].site_id;
+		console.log(this.siteUpdate.site_id);
+	}	
 	
 	
-	modificationSiteConfirme(){
+	confirmUpdateSite(){
 		
-		
-		console.log("Current Polygon"+this.sites_list[this.lastSelected].polygon);
-		console.log("New Polygon"+this.listePolygon[this.lastSelected].getPath().getArray());
-		
-		this.sites_list[this.lastSelected].polygon = this.listePolygon[this.lastSelected].getPath().getArray();
-		
-		console.log("Current Polygon after modif"+this.sites_list[this.lastSelected].polygon);
-		console.log("Modif refernece"+this.sites_list[this.lastSelected].reference);
-		
-		this.siteService.updateSite(this.sites_list[this.lastSelected]).subscribe(
-						site => {console.log('create result received:'+site);this.sites_list.push(site);},
+		this.siteUpdate.polygon = this.listePolygonSite[this.lastSelected].getPath().getArray();
+		console.log(this.siteUpdate);
+		this.siteService.updateSite(this.siteUpdate).subscribe(
+						site => {console.log('create result received:'+site);},
 						(err:any) => console.error(err) 
-		);
-		
+		);		
 	}
 	
 /*modif building*/	
