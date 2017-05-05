@@ -67,7 +67,7 @@ export class BuildingService {
 		
 		let body =
 		{
-			"orientation":4.567,"altitude":4.456,"reference":building.reference,"id_site":building.site_id,
+			"orientation":4.567,"altitude":4.456,"reference":building.reference,"id_site":building.site_id, 
 			"longitude":firstPoint.lng(),"cartesian":{"points":cartesianPoints},"latitude":firstPoint.lat()		
 		};
 		
@@ -95,7 +95,7 @@ export class BuildingService {
 		
 		let body =
 		{
-			"orientation":4.567,"altitude":4.456,"reference":building.reference,"id_site":building.site_id,
+			"orientation":4.567,"altitude":4.456,"reference":building.reference,"id_site":building.site_id,"building_id":building.building_id,
 			"longitude":firstPoint.lng,"cartesian":{"points":cartesianPoints},"latitude":firstPoint.lat		
 		};
 		
@@ -104,11 +104,11 @@ export class BuildingService {
 		return this.http.post(this.baseUrl+'/update',body,options)
 			.map((response) => {
 				console.log('update result received in service:');			
-				return response/* .json() */;
+				return response;
 			})
 			.catch(BuildingService.handleError);
 	}
-	
+	/* .json() */
   
   
    getDataOfABuild(idBuilding: number)
@@ -149,6 +149,8 @@ export class BuildingService {
    }
    
    
+  
+   
   constructFloorsOfBuilding(buildId : number,floorsOfABuilding:Array<any>):Array<Floor>
   {
 	let result : Array<Floor> = [];
@@ -159,8 +161,18 @@ export class BuildingService {
 				
 				newFloor.reference = floor.floorRef;
 				newFloor.id_floor = floor.floorId;
-				newFloor.polygon = this.convertStringPolygon(floor.floorPolygon);							
-				newFloor.listSpaces = this.constructSpacesOfFloor(floor.floorId,floor.spaces);	
+				newFloor.polygon = this.convertStringPolygon(floor.floorPolygon);	
+				
+				newFloor.listSpaces = this.constructSpacesOfFloor(floor.floorId,floor.spaces);
+				
+				/* if(floor.spaces[0])
+				{
+				}
+				else
+				{
+					newFloor.listSpaces = floor.spaces;
+				}
+ */				
 				newFloor.order_number = floor.order_number;				
 				
 				result.push(newFloor);

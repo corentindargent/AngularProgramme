@@ -14,32 +14,15 @@ import { Site,ISite,Building} from './model';
 
 export class AppComponent implements OnInit,AfterContentChecked  {
 	
-	@Input() newSite : Site;
-	@Input() newBuilding : Building;
-	siteListes:Array<ISite>; //var de teset certainemtn a bouger
-	public map: google.maps.Map;
+	public map: google.maps.Map;//conserver une refernce a lamp
+	@ViewChild('map') mapRef: ElementRef;//ref au div (elemt HTML) contenant la map
+	drawingManager : google.maps.drawing.DrawingManager;
+	polygonNonAffiche : boolean = true;
 	
-	
-	selectedSite : number;
-	
+	/*Liste de données*/
 	building_list : Array<Building>;
 	sites_list : Array<Site>;	
-	// sitePolygon : Array<google.maps.Polygon>; liste contenant tous les polygons afin
-	
-    @ViewChild('map') mapRef: ElementRef;
-	isOneSite : boolean = false;	
-	newPolySite : boolean;
-    drawingManager : google.maps.drawing.DrawingManager;
-	isNewSite : boolean = null;
-	isNewBuilding : boolean;
-	adressePostal : string;
-	nomSite : string;
-	static polygon : google.maps.Polygon ;
-	static isASite : boolean;
-	errorMessage :string;
 	listePolygon : Array<any>;
-	listePolygonBatiment : Array<any>;
-	polygonNonAffiche : boolean = true;
 	
 	
 	
@@ -106,41 +89,44 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 			
 			if(this.sites_list)
 			{	
+				
 				this.map = this.gmapService.map;//get refrence de la map; pour pouvoir cahcer ou affiche les polygons sur la map
 				
 		        /*PEUT PAS UTILISER DIRECTEMENT LES VARIABLES DEFINIES DANS ANGULAR DOIT PASSER PAR DES ARRAY INTERMETIAIRE*/
-				var tabPolygonSite = new Array(); 
+				var tabAllPolygon = new Array(); 
 				var tabPolygonBuilding = new Array(); 
-				var buildingList = new Array();
+				
 				
 				for(let i = 0; i < this.sites_list.length ;i++)
 				{
+					tabPolygonBuilding = new Array();//rest tab de building
 					var site = new google.maps.Polygon(AppComponent.listOptionsPolygonsSite);		
 					var path  = this.sites_list[i].polygon;
-					site.setPath(path); 
-					tabPolygonSite.push(site);
+					site.setPath(path); 					
+					
+				
 					
 					if(this.sites_list[i].listBuidling[0])//si site possede un building
 					{
-						
 						for(let index = 0 ; index < this.sites_list[i].listBuidling.length ; index++)
 						{
 							var batiment = new google.maps.Polygon(AppComponent.listOptionsPolygonsBuilding);		
 							var path  = this.sites_list[i].listBuidling[index].polygon;
-							batiment.setPath(path); 							
-							tabPolygonBuilding.push(batiment);
+							batiment.setPath(path); 
 							
-							buildingList.push(this.sites_list[i].listBuidling[index]);
-							console.log(this.sites_list[i].listBuidling[index]);
+							tabPolygonBuilding.push(batiment);							
 						}	
-						this.listePolygonBatiment = tabPolygonBuilding;					
-					}			
+										
+					}	
+					
+					/* ajout nouvelle ligne dnas tableau comprenant tous les polygons 
+					  *(ligne comprend polygon site et polygon fils)		*/
+					tabAllPolygon.push({"site" : site,"listBuilding":tabPolygonBuilding});
 					
 					
 				}
 				
-				this.building_list = buildingList;
-				this.listePolygon = tabPolygonSite;
+				this.listePolygon = tabAllPolygon;
 				this.polygonNonAffiche = false;
 			}
 		}
@@ -157,24 +143,41 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 	}
 	
 	selectView(i : number){
-		console.log(i);
+		
+		var self = this;
+		
 		if(this.lastSelected == null)
 		{
 			console.log("pas enceore de cselcetionner");
 		}
 		else
 		{
-			console.log("Last"+this.lastSelected);
-			this.listePolygon[this.lastSelected].setMap(null);		
+			
+			this.listePolygon[this.lastSelected].site.setMap(null);		//affiche le site
+			console.log(this.listePolygon[this.lastSelected].listBuilding);
+			
+			if(this.listePolygon[this.lastSelected].listBuilding[0])//signifie qu'il a des fils a cacher
+			{
+				this.listePolygon[this.lastSelected].listBuilding.forEach(function(element,index){
+					
+					element.setMap(null);
+				})
+				
+			}
 		}
 		
 		this.lastSelected = i;
-		this.listePolygon[this.lastSelected].setMap(this.map);
-	}
-	
-	resetHTML(){
-		this.isNewSite=false;
-		this.isNewBuilding=false;
+		
+		//rend visible le site
+		this.listePolygon[this.lastSelected].site.setMap(this.map);
+		
+		/*se centrer geographiquement sur site */
+		
+		//rend visible les batiments
+		this.listePolygon[this.lastSelected].listBuilding.forEach(function(element,index)
+		{					
+				element.setMap(self.map);
+		})		
 	}
 	
 }

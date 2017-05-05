@@ -32,7 +32,6 @@ export class SiteService {
   constructBuildingOfSite(siteId : number,buildingOfSite:Array<any>):Array<Building>
   {
 	 let result : Array<Building> = [];
-	console.log(siteId);
 	buildingOfSite.forEach( (aBuildOfSite) =>{
 					
 					var newBuilding = new Building();					
@@ -41,7 +40,7 @@ export class SiteService {
 						newBuilding.polygon = this.convertStringPolygon(aBuildOfSite.buildingPolygon);
 						newBuilding.site_id = siteId;
 											
-						console.log(newBuilding);
+						
 					result.push(newBuilding);
 				});
 	 
@@ -78,8 +77,6 @@ export class SiteService {
 						{
 							newSite.listBuidling =site.buildings;
 						}
-												
-						console.log(newSite.listBuidling);
 					result.push(newSite);
 				});
 		  }  

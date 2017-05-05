@@ -223,7 +223,8 @@
 					<div *ngIf="modifSite" >
 						<h1 [ngStyle]="{'color':'red'}" >Modification Site</h1>
 
-						<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="selectedPolygon" >
+					<!-- Permet de selcetionne le site a modifier-->
+  					   <select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="selectedPolygon" >
 								<option *ngFor="let site of sites_list; let i = index"
 								[value]="i" (click)="onSelectSite(i)" >Site : {{site.site_id }} - {{site.reference}}</option>							
 						</select>
@@ -255,19 +256,20 @@
 				<!--MODIFICATION BUILDING-->
 
 					<div *ngIf="modifBuilding" >
-						<h1 [ngStyle]="{'color':'red'}" >Modification Batiment</h1>
-
+						<h1 [ngStyle]="{'color':'red'}" >Modification Batiment</h1>     
+						
+					<!-- Permet de selcetionne le batiment a modifier-->
 						<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="selectedPolygon" >
 								<option *ngFor="let build of building_list; let i = index"
-								[value]="i" (click)="onSelectBuilding(i)" >Site : {{build.site_id }}</option>							
+								[value]="i" (click)="onSelectBuilding(i)" >Batiment : {{build.reference}} du site n°{{build.site_id }}</option>							
 						</select>
 							<br/>
 						<form   #formBuilding="ngForm" id="formulaire"  class="simple-form" >
 						
 						  <div class="form-group">
-							<label for="nom">Reference:</label>
-							<input #name="ngModel" type="text" class="form-control"  id="nom"
-								[(ngModel)] = "building_list[selectedPolygon].reference" name="address"	name="nomSite"	
+							<label for="reference">Reference:</label>
+							<input #name="ngModel" type="text" class="form-control"  id="reference"
+								[(ngModel)] = "buildUpdate.reference" 	name="reference"	
 								required />
 								
 							<p *ngIf="name.control.hasError('required')&& (name.touched)"
@@ -276,8 +278,20 @@
 						  </div> <!--/input Reference -->
 						  
 						  
+						  <!-- Autre champs modifiable -->
+						 <!--  <div class="form-group">
+							<label for="reference">Reference:</label>
+							<input #name="ngModel" type="text" class="form-control"  id="reference"
+								[(ngModel)] = "buildUpdate.reference" 	name="reference"	
+								required />
+								
+							<p *ngIf="name.control.hasError('required')&& (name.touched)"
+							class="alert alert-danger validation-message">Référence requise</p>
+							
+						  </div> --> 
+						  
 						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}</div>			  
-						  <button id="send" type="submit" (click)="modificationBuildConfirme()"  class="btn btn-default" [disabled]="formBuilding.invalid" >Submit</button>					
+						  <button id="send" type="submit" (click)="confirmUpdateBuild()"  class="btn btn-default" [disabled]="formBuilding.invalid" >Submit</button>					
 						</form>	
 					</div><!-- form batiment-->
 				

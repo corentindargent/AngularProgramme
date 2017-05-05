@@ -14,43 +14,46 @@ import { Site,ISite,Building} from '../model';
 })
 export class NewShapesComponent implements OnInit,AfterContentChecked{
 
-  @Input() newSite : Site;
-	@Input() newBuilding : Building;
-	siteListes:Array<ISite>; //var de teset certainemtn a bouger
+	@ViewChild('map') mapRef: ElementRef;//ref au div (elemt HTML) contenant la map
+	polygonNonAffiche : boolean = true;//permet de savoir si google maps est charge
+	drawingManager : google.maps.drawing.DrawingManager;
+	errorMessage :string;//permettra d'afficher des eventuels erreurs
+	
+	isOneSite : boolean = false;	// a virer plus tard et code html qui en depend
+	
+	/* LISTES COMPRENANT LES DONNÉES */
+		building_list : Array<Building>; //listes tous les batiments
+		sites_list : Array<Site>;	//listes tous les sites
+		listePolygonSite : Array<any>;
+		listePolygonBatiment : Array<any>;
 	
 	
 	
+	/* VARIABLE DE AJOUT */	
+	    static polygon : google.maps.Polygon ;
+	    static isASite : boolean;
 	
+	  /* SITE */
+		@Input() newSite : Site;
+		isNewSite : boolean = null;
+		
+	  /* BUILDING */
+		@Input() newBuilding : Building;
+		isNewBuilding : boolean;
+		
+		
+		
+	/* VARIABLE DE MODIFICATION */	
+		lastSelected: number;
+		@Input()selectedPolygon : number;
 	
-	building_list : Array<Building>;
-	sites_list : Array<Site>;	
-	// sitePolygon : Array<google.maps.Polygon>; liste contenant tous les polygons afin
+	  /* SITE */
+		modifSite : boolean = false;
+		@Input()siteUpdate : Site = new Site();	
 	
-    @ViewChild('map') mapRef: ElementRef;
-	isOneSite : boolean = false;	
-	newPolySite : boolean;
-    drawingManager : google.maps.drawing.DrawingManager;
-	isNewSite : boolean = null;
-	isNewBuilding : boolean;
-	adressePostal : string;
-	nomSite : string;
-	static polygon : google.maps.Polygon ;
-	static isASite : boolean;
-	errorMessage :string;
-	listePolygonSite : Array<any>;
-	listePolygonBatiment : Array<any>;
-	polygonNonAffiche : boolean = true;
-	
-	
-	
-	/* VARIABLE DE MODIFICATION */
-	
-		/* SITE */
-	modifSite : boolean = false;
-	modifBuilding : boolean = false;
-	@Input()selectedPolygon : number;
-	@Input()siteUpdate : Site = new Site();
-	lastSelected: number;
+	  /* BUILDING */
+		@Input()buildUpdate : Building = new Building();
+		modifBuilding : boolean = false;
 	
 	
 	/* OPTIONS DES POLYGONE CRÉÉS */	
@@ -281,9 +284,20 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		}
 	}
 	
+	modificationSite(){	
+	    console.log("Modif");
+		this.resetHTML();
+		this.modifSite = true;
+		this.selectedPolygon = 0; // par defaut le premier element sera selectionne
+		
+		this.lastSelected = this.selectedPolygon;
+		this.listePolygonSite[this.lastSelected].setOptions({fillColor:"#EEFE0B",editable:true});
+		
+		this.siteUpdate.reference =  this.sites_list[this.lastSelected].reference;
+		this.siteUpdate.site_id = this.sites_list[this.lastSelected].site_id;				
+	}	
 	
-	onSelectSite(index : number)
-    {
+	onSelectSite(index : number){
 		
 		/* REST DERNIER SITE SELECTIONNE (COULEUR,EDITABLE et forme de base)*/
 		this.listePolygonSite[this.lastSelected].setOptions({fillColor: '#00DE43'});
@@ -297,26 +311,10 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
         this.lastSelected = index;
 		this.listePolygonSite[this.lastSelected].setOptions({fillColor:"#EEFE0B"});
 		this.listePolygonSite[this.lastSelected].setOptions({editable:true });
-		console.log("Dernier Select (apres modif) :"+ this.lastSelected);
 		
 		this.siteUpdate.reference =  this.sites_list[this.lastSelected].reference;
 		this.siteUpdate.site_id = this.sites_list[this.lastSelected].site_id;
 	}
-	
-	modificationSite()	
-	{	
-	    console.log("Modif");
-		this.resetHTML();
-		this.modifSite = true;
-		this.selectedPolygon = 0; // par defaut le premier element sera selectionne
-		
-		this.lastSelected = this.selectedPolygon;
-		this.listePolygonSite[this.lastSelected].setOptions({fillColor:"#EEFE0B",editable:true});
-		
-		this.siteUpdate.reference =  this.sites_list[this.lastSelected].reference;
-		this.siteUpdate.site_id = this.sites_list[this.lastSelected].site_id;
-		console.log(this.siteUpdate.site_id);
-	}	
 	
 	
 	confirmUpdateSite(){
@@ -329,46 +327,52 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		);		
 	}
 	
-/*modif building*/	
-	onSelectBuilding(index : number)
-    {
-		console.log("Dernier Select :"+ this.lastSelected);
+/*MODIF BUILDING*/	
+
+	modificationBuilding(){	
+		
+		   console.log("Modif");
+		    this.resetHTML();
+			this.modifBuilding = true;
+			this.selectedPolygon = 0; // par defaut le premier element sera selectionne
+		
+			this.lastSelected = this.selectedPolygon;
+			this.listePolygonBatiment[this.lastSelected].setOptions({fillColor:"#EEFE0B"})
+			
+			//garnit la variable de modification
+			this.buildUpdate.reference = this.building_list[this.lastSelected].reference;
+			this.buildUpdate.site_id = this.building_list[this.lastSelected].site_id;
+			this.buildUpdate.building_id = this.building_list[this.lastSelected].building_id;
+			
+			console.log(this.buildUpdate);
+			
+			//google.maps.event.addListener(,"click",function(){console.log("modf");this.setOptions({fillColor:"#EEFE0B"});});	
+	}
+		
+		
+	onSelectBuilding(index : number){
 		
 		/* REST DERNIER SITE SELECTIONNE (COULEUR)*/
 		this.listePolygonBatiment[this.lastSelected].setOptions({fillColor: '#0073F7'});
 				
 		/* NOUVEAU SELECTIONNE */
+		
         this.lastSelected = index;
 		this.listePolygonBatiment[this.lastSelected].setOptions({fillColor:"#EEFE0B"});
-		console.log("Dernier Select (apres modif) :"+ this.lastSelected);
 		
-	}
-	
-	modificationBuilding()	
-	{	
-	   console.log("Modif");
-	   this.resetHTML();
-		this.modifBuilding = true;
-		this.selectedPolygon = 0; // par defaut le premier element sera selectionne
-		
-			//this.listePolygon = this.sites_list;
-		console.log(this.listePolygonBatiment);
-		this.lastSelected = this.selectedPolygon;
-		this.listePolygonBatiment[this.lastSelected].setOptions({fillColor:"#EEFE0B"})
-		
-		//google.maps.event.addListener(,"click",function(){console.log("modf");this.setOptions({fillColor:"#EEFE0B"});});	
+		this.buildUpdate.reference = this.building_list[this.lastSelected].reference;
+		this.buildUpdate.site_id = this.building_list[this.lastSelected].site_id;
+		this.buildUpdate.building_id = this.building_list[this.lastSelected].building_id;
 	}
 	
 	
-	modificationBuildConfirme(){		
+	
+	
+	confirmUpdateBuild(){		
 		
-		console.log("Current Polygon after modif"+this.building_list[this.lastSelected].polygon);
-		console.log("Modif refernece"+this.building_list[this.lastSelected].reference);
-		
-		this.building_list[this.lastSelected].polygon = this.listePolygonBatiment[this.lastSelected].getPath().getArray();
-		
-		
-		this.buildingService.updateBuilding(this.building_list[this.lastSelected]).subscribe(
+		this.buildUpdate.polygon = this.listePolygonBatiment[this.lastSelected].getPath().getArray();
+		console.log(this.buildUpdate);
+		this.buildingService.updateBuilding(this.buildUpdate).subscribe(
 						site => {console.log('create result received:');},
 						(err:any) => console.error(err) 
 		);
