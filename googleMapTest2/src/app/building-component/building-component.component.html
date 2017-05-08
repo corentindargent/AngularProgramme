@@ -56,25 +56,26 @@
 			</div><!--/navBar header-->
 			
 			<ul class="nav navbar-nav">
-			
+			<li><a id="newReader" [ngClass]="{'disabled':isOneSite}"  (click)="updateReader();">Update Reader</a></li>
+			<li><a id="newReader" [ngClass]="{'disabled':isOneSite}"  (click)="updateSpaces();">Update Space</a></li>
 			  <li><a id="newReader" [ngClass]="{'disabled':isOneSite}"  (click)="createNewReader();">Nouveau Reader</a></li>				
 			  <li><a id="newSite" [ngClass]="{'disabled':isOneSite}"  (click)="createNewFloor();">Nouvel etage</a></li>
 			  <li class="active"><a href="#">Home</a></li>
 			  <li class="dropdown">
-				<a class="dropdown-toggle" data-toggle="dropdown" href="#">Nouvelle forme
+				<a class="dropdown-toggle" data-toggle="dropdown" >Nouvelle forme
 				<span class="caret"></span></a>
 				<ul class="dropdown-menu">
 				  <li><a href="#" id="newSite">Nouveau site</a></li>
-				  <li><a href="#" [ngClass]="{'disabled':isOneSite}"  (click)="addPolygons(false);">Nouveau batiment</a></li>
+				  <li><a href="#" [ngClass]="{'disabled':isOneSite}"  >Nouveau batiment</a></li>
 				  <li><a href="#">Page 1-3</a></li>
 				</ul>
 			  </li>
 			  <li class="dropdown">
-				<a class="dropdown-toggle" data-toggle="dropdown" href="#">Modification
+				<a class="dropdown-toggle" data-toggle="dropdown" >Modification
 				<span class="caret"></span></a>
 				<ul class="dropdown-menu">
-				  <li><a href="#" onclick="modificationSite();">Modification site</a></li>
-				  <li><a href="#" onclick="modificationBuilding();">Modification batiment</a></li>				  
+				  <li><a >Modification site</a></li>
+				  <li><a >Modification batiment</a></li>				  
 				</ul>
 			  </li>
 			  

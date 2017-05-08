@@ -26,8 +26,7 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		sites_list : Array<Site>;	//listes tous les sites
 		listePolygonSite : Array<any>;
 		listePolygonBatiment : Array<any>;
-	
-	
+		
 	
 	/* VARIABLE DE AJOUT */	
 	    static polygon : google.maps.Polygon ;
@@ -41,8 +40,7 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		@Input() newBuilding : Building;
 		isNewBuilding : boolean;
 		
-		
-		
+				
 	/* VARIABLE DE MODIFICATION */	
 		lastSelected: number;
 		@Input()selectedPolygon : number;
@@ -63,8 +61,7 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 			strokeWeight: 2,
 			fillColor: '#00DE43',
 			fillOpacity: 0.2,				
-	};
-	
+	};	
 	static listOptionsPolygonsBuilding : Object = {				
 			strokeColor: '#010101',
 			strokeOpacity: 0.8, 
