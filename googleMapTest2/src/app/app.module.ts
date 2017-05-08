@@ -10,20 +10,22 @@ import { GoogleMapComponentComponent } from './google-map-component/google-map-c
 import {BuildingComponent} from './building-component/building-component.component';
 import { NewShapesComponent } from './new-shapes/new-shapes.component';
 import { RootComponent } from './root.component';
+import { ObjectComponent } from './object-component/object.component';
 
-import { BuildingService } from './building.service';
-import { GMapService } from './gmap-service.service';
-import { SiteService } from './service-site.service';
-import { FloorService } from './floor.service';
-import { SpaceService } from './space.service';
-import { ReaderService } from './reader.service';
-
+import {BuildingService} from './building.service';
+import {GMapService} from './gmap-service.service';
+import {SiteService} from './service-site.service';
+import {FloorService} from './floor.service';
+import {SpaceService} from './space.service';
+import {ReaderService} from './reader.service';
+import {ObjetService} from'./objet.service';
+import {TagService} from'./tag.service';
 
 
 
 @NgModule({
   declarations: [
-    AppComponent,GoogleMapComponentComponent, NewShapesComponent, BuildingComponent, RootComponent
+    AppComponent,GoogleMapComponentComponent, NewShapesComponent, BuildingComponent, RootComponent, ObjectComponent
   ],
   imports: [
     BrowserModule,

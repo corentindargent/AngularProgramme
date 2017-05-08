@@ -3,8 +3,8 @@ import { Routes, RouterModule } from '@angular/router';
 
 import {AppComponent} from '../app.component';
 import {BuildingComponent} from  '../building-component/building-component.component';
-import { NewShapesComponent }from '../new-shapes/new-shapes.component';
-
+import {NewShapesComponent} from '../new-shapes/new-shapes.component';
+import {ObjectComponent} from '../object-component/object.component';
 
 
 export const routes: Routes = [
@@ -12,8 +12,8 @@ export const routes: Routes = [
  // { path: 'home',  component: DashboardComponent },
   { path: 'building/:id', component: BuildingComponent },
   { path: 'home',  component: AppComponent },
-  { path: 'newPolygon',  component: NewShapesComponent }
-
+  { path: 'newPolygon',  component: NewShapesComponent },
+  { path: 'object',  component: ObjectComponent }
 ];
 
 

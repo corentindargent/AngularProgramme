@@ -6,7 +6,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/throw';
 
-import { Site,Building } from './model';
+import { Site,Building,Object } from './model';
 
 @Injectable()
 export class SiteService {
@@ -93,10 +93,6 @@ export class SiteService {
   
   convertStringPolygon(polygon:string):Array<any> 
   {
-	  /* console.log("POLYGON");
-	  console.log(polygon);
-	  console.log(polygon.match(/[0-9]+.[0-9]+/g)); */
-	  
 	  var listCoord = polygon.match(/[0-9]+.[0-9]+,[0-9]+.[0-9]+/g);
       var tabCoordPolygon = new Array(); 
 	  
@@ -104,11 +100,6 @@ export class SiteService {
 		{
 			let obj = {};
 			var finalRes = listCoord[i].match(/[0-9]+.[0-9]+/g);
-			
-			/* console.log("x:"+finalRes[0]+" y:"+finalRes[1]);			
-			console.log("lat:"+finalRes[0]+"\n");
-			console.log("lng:"+finalRes[1]+"\n");
-			console.log("\n\n"); */
 			
 			obj["lat"] = parseFloat(finalRes[0]);
 			obj["lng"] = parseFloat(finalRes[1]);
@@ -122,71 +113,12 @@ export class SiteService {
   { 
     var tabJson = [];
 	for (var i = 0; i < listPoints.length; i++) {
-				var xy = listPoints[i];
-				
-					tabJson.push({'x': xy.lat(),'y': xy.lng()});
-				
+		var xy = listPoints[i];		
+		tabJson.push({'x': xy.lat(),'y': xy.lng()});				
 	}
 		return tabJson;
   }
   
-  addBuilding(building : any){
-	 
-      /*Create BUIDLING*/	 
-	let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
-    let options  = new RequestOptions({ headers: headers });	
-	
-	var cartesianPoints = [];	
-		cartesianPoints = this.createJsonPolygon(building.polygon,true);
-	var firstPoint =  building.polygon[0];	
-	
-	let body =
-	{
-		"orientation":4.567,"altitude":4.456,"reference":building.reference,"id_site":building.site_id,
-		"longitude":firstPoint.lng(),"cartesian":{"points":cartesianPoints},"latitude":firstPoint.lat()		
-	};
-	
-	console.log(JSON.stringify(body));
-	
-	return this.http.post(this.baseUrl+'/building/add',body,options)
-		.map((response) => {
-			console.log('update result received in service:');			
-			return response/* .json() */;
-		})
-	    .catch(SiteService.handleError);
-	}
-  
-  
-
-  
-    updateBuilding(building : any){
-	 
-      /*Create BUIDLING*/	 
-	let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
-    let options  = new RequestOptions({ headers: headers });	
-	
-	var cartesianPoints = [];	
-		cartesianPoints = this.createJsonPolygon(building.polygon,true);
-		console.log(building.polygon[0]);
-	var firstPoint =  building.polygon[0];	
-	
-	let body =
-	{
-		"orientation":4.567,"altitude":4.456,"reference":building.reference,"id_site":building.site_id,
-		"longitude":firstPoint.lng,"cartesian":{"points":cartesianPoints},"latitude":firstPoint.lat		
-	};
-	
-	console.log(JSON.stringify(body));
-	 /*PUT PASSE PAS BLOQUER */
-	return this.http.post(this.baseUrl+'/building/update',body,options)
-		.map((response) => {
-			console.log('update result received in service:');			
-			return response/* .json() */;
-		})
-	    .catch(SiteService.handleError);
-	}
-	
-	
   
 	addSite(site: any){
 	  
@@ -251,4 +183,32 @@ export class SiteService {
 			.catch(SiteService.handleError);		
 	}
 	
+	
+	getAllObject(siteId : number)
+	{
+		let headers  = new Headers({ 'Accept': 'application/json','Authorization':'Bearer token' }); 
+        let options  = new RequestOptions({ headers: headers });
+		
+		
+		return this.http.get(this.baseUrl+"/object?siteId="+siteId,options)
+		  .map((res:Response) => res.json())
+	      .map((objects:Array<any>) => {
+		  let result:Array<Object> = [];			 
+		  if(objects)
+		  {
+				objects.forEach( (obj) =>{
+					
+					var object = new Object();					
+					 object.reference = obj.objectRef;
+					 object.spaceRef = obj.spaceRef;
+					 object.id_object = obj.objectId;					
+					result.push(object);
+				});
+		  }
+			  return result;
+	      
+		})
+		.catch(SiteService.handleError);	  
+	
+	}
 }
