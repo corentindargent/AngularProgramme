@@ -165,12 +165,14 @@ export class Object {
   id_object : number;
   reference : string;
   spaceRef : string;
+  spaceId : number;
   
   constructor()
   {
 	 this.id_object = -1;
 	 this.reference = ""; 
-	 this.spaceRef = "";	 
+	 this.spaceRef = "";	
+	 this.spaceId = null;	 
   }   
 }
 

@@ -73,6 +73,12 @@
    cursor: default;
 }
 
+li.selectFloor{
+		font-size: larger;
+		font-weight: bold;
+		color:#00739D;
+	}
+	
 			
 		</style>
 		
@@ -143,14 +149,18 @@
 					<div>
 						<h1 [ngStyle]="{'color':'red'}" >SITES</h1>
 						<ul>
-							<li *ngFor="let site of sites_list; let i = index" (click)="selectView(i)">							
+							<li *ngFor="let site of sites_list; let i = index" (click)="selectView(i)" [class.selectFloor]="lastSelected == i">							
 									Site : {{site.reference }} 
-									<ul *ngFor="let build of site.listBuidling; let i = index" >
-										<a [routerLink]="['/building', build.building_id]"><li> {{build.reference}} </li></a> 
-										
+									<ul *ngIf="siteSelected == site">
+										<li *ngFor="let build of site.listBuidling; let i = index" style="font-weight : normal;">
+											<a [routerLink]="['/building', build.building_id]"><li> {{build.reference}} </li></a> 
+										</li>
 									</ul>							
 							</li>
 						</ul>
+						<div *ngIf="siteSelected">
+							<button  [routerLink]="['/object',siteSelected.site_id]"> Consulter les objets présents sur le site </button>
+						</div>
 					</div><!-- form batiment-->				
 				
 				

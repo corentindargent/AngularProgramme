@@ -13,7 +13,7 @@ export const routes: Routes = [
   { path: 'building/:id', component: BuildingComponent },
   { path: 'home',  component: AppComponent },
   { path: 'newPolygon',  component: NewShapesComponent },
-  { path: 'object',  component: ObjectComponent }
+  { path: 'object/:siteId',  component: ObjectComponent }
 ];
 
 

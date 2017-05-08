@@ -1,8 +1,8 @@
-import { Component,OnInit,ViewChild,ElementRef,AfterViewChecked,Input,AfterContentChecked } from '@angular/core';
+import { Component,OnInit,ViewChild,ElementRef,AfterViewChecked,Input,AfterContentChecked,} from '@angular/core';
 import { GMapService } from './gmap-service.service';
 import { SiteService} from './service-site.service';
 
-import { Site,ISite,Building} from './model';
+import { Site,Building} from './model';
 
 
 @Component({
@@ -25,15 +25,8 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 	listePolygon : Array<any>;
 	
 	
-	
-	/* VARIABLE DE MODIFICATION */
-	
-		/* SITE */
-	modifSite : boolean = false;
-	modifBuilding : boolean = false;
-	@Input()selectedPolygon : number;
 	lastSelected: number;
-	
+	siteSelected : Site;
 	
 	/* OPTIONS DES POLYGONE CRÉÉS */	
     static listOptionsPolygonsSite : Object  = { 
@@ -51,13 +44,6 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 			fillColor: '#0073F7',
 			fillOpacity: 0.35,
 	};
-	
-	/*var de test*/
-	colorChange = "red";
-	
-	
-	
-	
 	
 	
     constructor(private gmapService: GMapService, private siteService: SiteService) { }
@@ -133,6 +119,8 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 	}
 	
 	
+
+	
 	 removeDrawingManager(){
 		let drawingManagerTest = this.gmapService.getDrawingManager();		
 		drawingManagerTest.setOptions({drawingControl: false,drawingMode: null});
@@ -171,7 +159,10 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 		//rend visible le site
 		this.listePolygon[this.lastSelected].site.setMap(this.map);
 		
+		this.siteSelected = this.sites_list[this.lastSelected];
 		/*se centrer geographiquement sur site */
+		console.log(this.siteSelected);
+		
 		
 		//rend visible les batiments
 		this.listePolygon[this.lastSelected].listBuilding.forEach(function(element,index)

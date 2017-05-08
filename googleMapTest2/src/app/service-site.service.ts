@@ -11,15 +11,24 @@ import { Site,Building,Object } from './model';
 @Injectable()
 export class SiteService {
 
+ 
   public site :Site;
-  private baseUrl :string  = "http://indoor.traxxeo.com/service";  
+  private baseUrl :string  = "http://indoor.traxxeo.com/service/site";  
   
   //APRES L'appel A  UN SERVICE CELUI-CI RETURN STRING ET NON PLUS UN JSON
   
   constructor(private http : Http) {
 	}
-  
-  
+	
+  /* SI envoie object site au lieu id (acces page object site)
+  private siteSendToOtherComponent : Site;
+    getSiteSend(){
+		return this.siteSendToOtherComponent;
+	}
+	
+	setSiteSend(site :Site){
+		this.siteSendToOtherComponent = site;
+	} */
  
 	static handleError (error : Response){
 	  console.log("Error catch");
@@ -27,7 +36,7 @@ export class SiteService {
 	  console.log(error.json());
 	  return Observable.throw(error.json().error || 'Server error');	  
 	  
-  }
+	}
    
   constructBuildingOfSite(siteId : number,buildingOfSite:Array<any>):Array<Building>
   {
@@ -53,7 +62,7 @@ export class SiteService {
 	   let headers  = new Headers({ 'Accept': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
        let options  = new RequestOptions({ headers: headers });
 		
-	  return this.http.get("http://indoor.traxxeo.com/service/site/listAll",options)
+	  return this.http.get(this.baseUrl+"/listAll",options)
 	   .map((res:Response) => res.json())
 	   .map((sites:Array<any>) => {
 		  let result:Array<Site> = [];
@@ -140,7 +149,7 @@ export class SiteService {
 
 	console.log(JSON.stringify(body));	
 
-	return this.http.post(this.baseUrl+'/site/add',body,options)
+	return this.http.post(this.baseUrl+'/add',body,options)
 		.map((response) => {
 			
 			console.log('update result received in service:');
@@ -174,7 +183,7 @@ export class SiteService {
 		console.log(JSON.stringify(body));
 
 		 /*PUT PASSE PAS BLOQUER */
-		return this.http.post(this.baseUrl+'/site/update',body,options)
+		return this.http.post(this.baseUrl+'/update',body,options)
 			.map((response) => {
 				console.log('update result received in service:');
 			
@@ -200,7 +209,7 @@ export class SiteService {
 					
 					var object = new Object();					
 					 object.reference = obj.objectRef;
-					 object.spaceRef = obj.spaceRef;
+					 object.spaceId = obj.spaceId;
 					 object.id_object = obj.objectId;					
 					result.push(object);
 				});

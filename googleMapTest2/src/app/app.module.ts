@@ -34,7 +34,7 @@ import {TagService} from'./tag.service';
 	RoutingModule
 	
   ],
-  providers: [GMapService,SiteService,BuildingService,SpaceService,FloorService,ReaderService],
+  providers: [GMapService,SiteService,BuildingService,SpaceService,FloorService,ReaderService,ObjetService,TagService],
   bootstrap: [RootComponent]
 })
 export class AppModule { }
