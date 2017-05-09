@@ -50,7 +50,7 @@ export class ObjetService {
 		
 		let body =
 		{
-			"reference":object.reference,
+			"reference":object.reference,"object_id":object.id_object,
 		};
 		
 		return this.http.post(this.baseUrl+'/update',body,options)
@@ -82,6 +82,31 @@ export class ObjetService {
 			  return result;
 	      })
 		 .catch(ObjetService.handleError);	   
+	}
+	
+	getAllObjects(){
+		
+		let headers  = new Headers({ 'Accept': 'application/json','Authorization':'Bearer token' }); 
+        let options  = new RequestOptions({ headers: headers });
+		
+		return this.http.get(this.baseUrl+"/listAll",options)
+		  .map((res:Response) => res.json())
+	      .map((objects:Array<any>) => {
+		  let result:Array<Object> = [];			 
+		  if(objects)
+		  {
+				objects.forEach( (obj) =>{					
+					var object = new Object();					
+					 object.reference = obj.reference;					 
+					 object.id_object = obj.object_id;					
+					result.push(object);
+				});
+		  }
+			  return result;
+	      
+		})
+		.catch(ObjetService.handleError);	 		
+		
 	}
 	
 	

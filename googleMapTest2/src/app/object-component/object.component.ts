@@ -22,14 +22,29 @@ export class ObjectComponent implements OnInit {
   
   @ViewChild(NguiPopupComponent) popup: NguiPopupComponent;  
   @ViewChild('modal')  modal: ModalComponent;
-   
+  
+  @ViewChild('modal')  modalUpdate: ModalComponent;
   private siteId : number;
+  
+  //var ajout
   @Input()  newObject : Object;
+  
+  
+  //var update
+  private mouse_hover : boolean;
+  private selectedObject : any;
+  
+  
+  
   
   //Liste de données
   objects_listes : Array<Object>;
 
-  
+  listObject : Array<any> =  [
+					{spaceId:0 ,reference:"Sac a dos",id_object:10},
+						{spaceId:1,reference:"Cartable",id_object:11},
+							{spaceId:2,reference:"Bonbon",id_object:11}
+								];
 
   constructor(private route : ActivatedRoute, private siteService: SiteService, private objectService : ObjetService) { }
 
@@ -40,6 +55,7 @@ export class ObjectComponent implements OnInit {
 	 this.initPage();
   }
   
+ 
   initPage(){
 	  console.log(this.siteId);
 	  this.newObject = new Object(); 
@@ -60,11 +76,11 @@ export class ObjectComponent implements OnInit {
       })
   }
   
-  /*Method fenetre Modal*/
+  /*Method fenetre Modal
   closeModal() {
         this.modal.close();
     }
-    
+     
     openModal() {
         this.modal.open();
     }
@@ -74,7 +90,7 @@ export class ObjectComponent implements OnInit {
   createObjet(){
 	  this.openModal();
 	  
-  }
+  } */
   
  confirmAddObjet(){
 	 this.modal.close();
@@ -86,5 +102,23 @@ export class ObjectComponent implements OnInit {
 		  (err:any) => console.error(err) 
 		  );  
  }
+ 
+ confirmUpdateObjet(){
+	 this.modalUpdate.close();
+	 console.log("Ok");
+	 console.log(this.newObject);
+	  this.objectService.updateObject(this.newObject).subscribe(
+			obj => {console.log('create new object'+obj);
+			 this.initPage(); },
+		  (err:any) => console.error(err) 
+		  );  
+ }
+ 
+  selectingObject(i:number){
+	  console.log(i);
+	  this.selectedObject = this.listObject[i];
+	  this.newObject.reference = this.listObject[i].reference;	  
+	  this.newObject.id_object = this.listObject[i].id_object;	
+  }
 
 }

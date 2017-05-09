@@ -300,7 +300,13 @@ export class BuildingComponent implements OnInit {
 	 
 	this.selectedSpace = polygon;
 	this.selectedSpace.setAttribute('fill', '#00FE08');
+	 
+/* 
+inserer le polygn a la fin pour tre entierement visible
+	var g = polygon.parentNode.parentNode;
 	
+	g.insertBefore(polygon.parentNode,g.lastChild);
+	 */
 	 //garnit la varaible d'update avec les info du polygon selectionne
 	this.spaceUpdate.reference = this.currentFloor.listSpaces[this.selectedSpace.id].reference;
     this.spaceUpdate.id_space = this.currentFloor.listSpaces[this.selectedSpace.id].id_space;

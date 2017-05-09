@@ -1,16 +1,3 @@
-/*INTERFACE CORRESPONDANT JSON ENVOYEE*/
-
-export interface ISite
-{	
-    siteRef:number;
-	latitude:number;	
-	buildings:Array<IBuilding>;
-	sitePolygon:number[][];
-	siteId : number;
-}
-
-
-
 
 	/* CLASSE */
 export class Site {
@@ -39,9 +26,6 @@ export class Site {
 	}
    
 }
-
-
-
 
 export class Building  {	
 	
@@ -178,25 +162,28 @@ export class Object {
 
 
 
-export class Tag      {
-  constructor(
-	public Tag_id     : number, 
-	public reference: string, 
-    public Mac : string,	
-	public X  : number,
-	public Y    : number,
-	public Z : number,
-    public Fixed : boolean,
-	public Object_id    : number,
-	public Last_Data_Event_Id : number,
-	) {
+export class Tag      {	
+	id_tag : number; 
+	reference: string; 
+    mac : string;	
+	x : number;
+	y : number;
+	z : number;
+    fixed : boolean;
+	id_object : number;
+	last_data_event_id : number;
+	
+  constructor(){ 
+	this.id_tag = -1; 
+	this.reference = ""; 
+    this.mac = "";	
+	this.x = 0; 
+	this.y = 0; 
+	this.z = 0; 
+    this.fixed = false;
+	this.id_object = null;
+	this.last_data_event_id  = null;
+  
   }
 }
 
-export interface IBuilding
-{
-	buildingRef:number;		
-	buildingPolygon:number[][];
-	buildingId : number;
-	
-}

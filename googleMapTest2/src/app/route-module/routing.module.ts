@@ -5,6 +5,9 @@ import {AppComponent} from '../app.component';
 import {BuildingComponent} from  '../building-component/building-component.component';
 import {NewShapesComponent} from '../new-shapes/new-shapes.component';
 import {ObjectComponent} from '../object-component/object.component';
+import {ObjectDetailComponent} from '../object-detail/object-detail.component';
+import {TagComponent} from '../tag/tag.component';
+
 
 
 export const routes: Routes = [
@@ -13,7 +16,9 @@ export const routes: Routes = [
   { path: 'building/:id', component: BuildingComponent },
   { path: 'home',  component: AppComponent },
   { path: 'newPolygon',  component: NewShapesComponent },
-  { path: 'object/:siteId',  component: ObjectComponent }
+  { path: 'object/:siteId',  component: ObjectComponent },
+  { path: 'object/details/:objectId',  component: ObjectDetailComponent },
+  { path: 'tag',  component: TagComponent },
 ];
 
 

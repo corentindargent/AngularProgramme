@@ -16,6 +16,7 @@ import { NewShapesComponent } from './new-shapes/new-shapes.component';
 import { RootComponent } from './root.component';
 import { ObjectComponent } from './object-component/object.component';
 import { ObjectDetailComponent } from './object-detail/object-detail.component';
+import { TagComponent } from './tag/tag.component';
 
 import {BuildingService} from './building.service';
 import {GMapService} from './gmap-service.service';
@@ -30,7 +31,7 @@ import {TagService} from'./tag.service';
 
 @NgModule({
   declarations: [
-    AppComponent,GoogleMapComponentComponent, NewShapesComponent, BuildingComponent, RootComponent, ObjectComponent, ObjectDetailComponent
+    AppComponent,GoogleMapComponentComponent, NewShapesComponent, BuildingComponent, RootComponent, ObjectComponent, ObjectDetailComponent, TagComponent
   ],
   imports: [
     BrowserModule,

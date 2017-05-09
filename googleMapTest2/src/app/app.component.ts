@@ -133,6 +133,7 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 	selectView(i : number){
 		
 		var self = this;
+		if(this.lastSelected == i){return;}//si site deja selecionne quitte
 		
 		if(this.lastSelected == null)
 		{
@@ -149,12 +150,17 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 				this.listePolygon[this.lastSelected].listBuilding.forEach(function(element,index){
 					
 					element.setMap(null);
-				})
-				
+				})				
 			}
 		}
 		
 		this.lastSelected = i;
+		
+		//centre la map sur le site
+		console.log("center map");
+		 console.log(this.listePolygon[this.lastSelected].site.getPath().getAt(0))
+		this.map.setCenter(this.listePolygon[this.lastSelected].site.getPath().getAt(0));
+		this.map.setZoom(18);
 		
 		//rend visible le site
 		this.listePolygon[this.lastSelected].site.setMap(this.map);

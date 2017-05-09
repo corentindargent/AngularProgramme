@@ -4,7 +4,7 @@ import { GMapService } from '../gmap-service.service';
 import { SiteService} from '../service-site.service';
 import { BuildingService } from '../building.service';
 
-import { Site,ISite,Building} from '../model';
+import { Site,Building} from '../model';
 
 
 @Component({

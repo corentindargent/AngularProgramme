@@ -1,0 +1,161 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+     	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
+		<link href="/css/bootstrap.min.css" rel="stylesheet">
+		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+	   
+		<script src="https://cdn.jsdelivr.net/d3js/3.5.9/d3.min.js"></script>
+		<script src="http://d3js.org/d3.v3.min.js" ></script>
+		
+	    <style>
+			.selectObject{background : #879492; color:white;}
+		</style>
+</head>
+
+<body>	
+
+		<nav class="navbar navbar-inverse">
+			  <div class="container-fluid">
+				<div class="navbar-header">
+				  <a class="navbar-brand" href="#">WebSiteName</a>
+				</div><!--/navBar header-->
+				
+				<ul class="nav navbar-nav">
+				  <li class="active"><a href="#">Home</a></li>
+				 <li><a (click)="createTag()"> New Tag </a></li> 
+				  <li><a id="newReader" [ngClass]="{'disabled':isOneSite}" (click)="updateTag()" >Update Tag</a></li>					
+				</ul><!--/navbar-nav-->
+				  
+
+			  </div><!--/container-->
+		</nav>
+	
+		<div class="container-fluid">		
+		
+			<div class="row">	
+			    <div class="col-lg-offset-2 col-lg-8 col-lg-offset-2">
+				
+					<!--FORMUALIRE NEW TAG-->	
+						<div *ngIf="basicView">					    
+							<h1 [ngStyle]="{'color':'red'}" > Nouveau Tag </h1>
+							<form #form="ngForm" id="formulaire"  class="simple-form" >
+							
+							  <div class="form-group"><!--input Nom -->
+								<label for="refTag">Reference:</label>
+								<input #name="ngModel" type="text" class="form-control"  id="refTag"
+									[(ngModel)] = "newTag.reference" 	name="refTag"	
+									required />
+									
+								<p *ngIf="name.control.hasError('required')&& (name.touched)"
+								class="alert alert-danger validation-message">Référence requise</p>
+								
+							  </div> <!--/input Nom -->
+							  
+							  <div class="form-group"><!--input adresseMac -->
+								<label for="adresseMac">Mac adresse:</label>
+								<input #adresseMac="ngModel" type="text" class="form-control required" id="adresseMac" required
+								[(ngModel)] = "newTag.mac" name="adresseMac" />
+							  
+								<p *ngIf="adresseMac.control.hasError('required') && (adresseMac.touched)"
+								class="alert alert-danger validation-message">Adresse mac requise</p>
+								
+							  </div><!--/input adresseMac -->
+							  
+							 <div class="form-group"><!--SELCET OBJECT -->
+								<label for="object">Object:</label>
+								<select  #SelectObject="ngModel" class="form-control"  id="object" name="object" [(ngModel)]="newTag.id_object">
+								<option *ngFor="let object of objects_liste; let i = index;"
+									[value]="object.id_object"  required> {{object.id_object }} - {{ object.reference }}</option>							
+								</select>
+							  
+								<p *ngIf="SelectObject.control.hasError('required') && (SelectObject.touched)"
+								class="alert alert-danger validation-message"> Espace doit etre selectionne </p>
+							
+						    </div><!--/input OBJECT -->
+							
+							 
+							  
+							  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
+							  <button id="send" type="submit" (click)="confirmAddTag()"  class="btn btn-default" [disabled]="(!form.form.valid) || (!newTag.id_object)" >Submit</button>
+							</form>
+						</div><!-- form site-->	
+					<!--/fin CREATION NEW tag-->
+					
+					<!-- UPDATE tag-->
+					  <div *ngIf="isUpdateTag">	
+					  
+						<div>
+							<h1> Modification tag</h1>
+							<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="selectedTag" >
+									<option *ngFor="let tag of tag_listes; let i = index"
+									[value]="i" (click)="onSelectTag(i)" >Tag : {{tag.reference}}</option>							
+							</select>	
+						</div>
+						
+							<br/>
+						  <div *ngIf="selectedTag">
+							<h3 [ngStyle]="{'color':'red'}" > Tag à modifier : {{newTag.reference}} </h3>
+							<form #form="ngForm" id="formulaire"  class="simple-form" >
+							
+							  <div class="form-group"><!--input Nom -->
+								<label for="refTag">Reference:</label>
+								<input #name="ngModel" type="text" class="form-control"  id="refTag"
+									[(ngModel)] = "newTag.reference" 	name="refTag"	
+									required />
+									
+								<p *ngIf="name.control.hasError('required')&& (name.touched)"
+								class="alert alert-danger validation-message">Référence requise</p>
+								
+							  </div> <!--/input Nom -->
+							  
+							  <div class="form-group"><!--input adresseMac -->
+								<label for="adresseMac">Mac adresse:</label>
+								<input #adresseMac="ngModel" type="text" class="form-control required" id="adresseMac" required
+								[(ngModel)] = "newTag.mac" name="adresseMac" />
+							  
+								<p *ngIf="adresseMac.control.hasError('required') && (adresseMac.touched)"
+								class="alert alert-danger validation-message">Adresse mac requise</p>
+								
+							  </div><!--/input adresseMac -->
+							  
+							 <div class="form-group"><!--SELCET OBJECT -->
+								<label for="object">Object:</label>
+								<select  #SelectObject="ngModel" class="form-control"  id="object" name="object" [(ngModel)]="newTag.id_object">
+								<option *ngFor="let object of objects_liste; let i = index;"
+									[value]="object.id_object"  required> {{object.id_object }} - {{ object.reference }}</option>							
+								</select>
+							  
+								<p *ngIf="SelectObject.control.hasError('required') && (SelectObject.touched)"
+								class="alert alert-danger validation-message"> Espace doit etre selectionne </p>
+							
+							</div><!--/input OBJECT -->
+							
+							 
+							  
+							  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
+							  <button id="send" type="submit" (click)="confirmUpdateTag()"  class="btn btn-default" [disabled]="(!form.form.valid) || (!newTag.id_object)" >Submit</button>
+							</form>
+							</div><!-- form site-->	
+						</div>
+						
+					<!--/fin UPDATE tag--->				
+				</div>
+			</div>
+			<br /><br />
+		
+			<div class='row'>			
+				<div class="col-lg-12 text-center pb-5">
+					<button class="btn btn-primary btn-rond" id="confirmBtn"  >  </button>
+					<button class="btn btn-primary btn-rond " [disabled]="!selectedObject"></button>					
+				</div><!-- /button_footer-->			
+			</div><!-- /row-->	
+				
+		</div>
+		
+	 
+</body>
+</html>
