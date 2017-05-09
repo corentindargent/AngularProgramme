@@ -21,7 +21,8 @@ export class ObjetService {
   }
    
    addObject(object : Object){
-	 
+	 console.log("add obj");
+	 console.log(object);
       /*Create BUIDLING*/	 
 	let headers  = new Headers({ 'Content-Type': 'application/json','Authorization':'Bearer token' }); // ... Set content type to JSON
     let options  = new RequestOptions({ headers: headers });	

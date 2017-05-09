@@ -4,6 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
 import {RoutingModule} from './route-module/routing.module';
 
+//* Pop-up __ Modal *//
+import { NguiPopupModule } from '@ngui/popup';
+import { Ng2Bs3ModalModule } from 'ng2-bs3-modal/ng2-bs3-modal';
+
 
 import { AppComponent } from './app.component';
 import { GoogleMapComponentComponent } from './google-map-component/google-map-component.component';
@@ -11,6 +15,7 @@ import {BuildingComponent} from './building-component/building-component.compone
 import { NewShapesComponent } from './new-shapes/new-shapes.component';
 import { RootComponent } from './root.component';
 import { ObjectComponent } from './object-component/object.component';
+import { ObjectDetailComponent } from './object-detail/object-detail.component';
 
 import {BuildingService} from './building.service';
 import {GMapService} from './gmap-service.service';
@@ -25,14 +30,15 @@ import {TagService} from'./tag.service';
 
 @NgModule({
   declarations: [
-    AppComponent,GoogleMapComponentComponent, NewShapesComponent, BuildingComponent, RootComponent, ObjectComponent
+    AppComponent,GoogleMapComponentComponent, NewShapesComponent, BuildingComponent, RootComponent, ObjectComponent, ObjectDetailComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule,
-	RoutingModule
-	
+	RoutingModule,
+	NguiPopupModule,
+	Ng2Bs3ModalModule	
   ],
   providers: [GMapService,SiteService,BuildingService,SpaceService,FloorService,ReaderService,ObjetService,TagService],
   bootstrap: [RootComponent]

@@ -142,7 +142,7 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 		{
 			
 			this.listePolygon[this.lastSelected].site.setMap(null);		//affiche le site
-			console.log(this.listePolygon[this.lastSelected].listBuilding);
+			//console.log(this.listePolygon[this.lastSelected].listBuilding);
 			
 			if(this.listePolygon[this.lastSelected].listBuilding[0])//signifie qu'il a des fils a cacher
 			{
@@ -161,7 +161,7 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 		
 		this.siteSelected = this.sites_list[this.lastSelected];
 		/*se centrer geographiquement sur site */
-		console.log(this.siteSelected);
+		//console.log(this.siteSelected);
 		
 		
 		//rend visible les batiments

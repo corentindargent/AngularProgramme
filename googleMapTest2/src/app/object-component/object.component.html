@@ -3,22 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-
-    <link href="/css/bootstrap.min.css" rel="stylesheet">
+     	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.6/css/bootstrap.css">
+		<link href="/css/bootstrap.min.css" rel="stylesheet">
 		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-	
-	<!-- JS -->
-	
-	<script src="/js/jquery.js"></script>
-	<script src="/js/bootstrap.min.js"></script>	
-	<script src="//d3js.org/d3.v3.min.js"></script>	
-	
-	<script src="https://cdn.jsdelivr.net/d3js/3.5.9/d3.min.js"></script>
-	<script src="http://d3js.org/d3.v3.min.js" ></script>
+
+	   
+		<script src="https://cdn.jsdelivr.net/d3js/3.5.9/d3.min.js"></script>
+		<script src="http://d3js.org/d3.v3.min.js" ></script>
 	
 </head>
 
 <body>	
+
 		<nav class="navbar navbar-inverse">
 			  <div class="container-fluid">
 				<div class="navbar-header">
@@ -58,9 +54,34 @@
 			  </div><!--/container-->
 		</nav>
 	
-		<div class="container-fluid">
+		<div class="container-fluid">		
+		
 			<div class="row">			
-				
+				<div><!--Pop-up-->
+				<ngui-popup #popup></ngui-popup>
+			</div><!--/Pop-up-->
+			
+			<modal #modal>
+				<modal-header [show-close]="true">
+					<h2 class="modal-title">Create new object</h2>
+				</modal-header>
+				<modal-body>
+						<h4>Object</h4>
+					<form #form="ngForm" id="formulaire"  class="simple-form" >
+						<div class="form-group"><!-- Champs reference -->
+							<label for="textbox">Reference</label>
+							<input #reference="ngModel"  type="text" class="form-control" id="textbox" name="textbox"
+								[(ngModel)]="newObject.reference" required>
+							<p *ngIf="reference.control.hasError('required')&& (reference.touched)"
+							class="alert alert-danger validation-message">Référence requise</p>
+						</div> <!-- /Champs reference -->       
+					</form>
+				</modal-body>
+				<modal-footer >
+					<button type="button" class="btn btn-default" data-dismiss="modal" (click)="modal.close()">Cancel</button>
+					<button type="button" class="btn btn-primary" [disabled]="!newObject.reference" (click)="confirmAddObjet()">Submit</button>
+				</modal-footer>
+			</modal>	
 				
 				<div class="col-lg-offset-2 col-lg-8 col-lg-offset-2"> <!-- tab de données-->
 					<table class="table">
@@ -87,11 +108,13 @@
 				
 
 			</div>
+			
+			
 			<br /><br />
 		
 			<div class='row'>			
 				<div class="col-lg-12 text-center pb-5">
-					<button class="btn btn-primary btn-rond" id="confirmBtn" onclick="createObjet()" > Creer nouvel objet </button>
+					<button class="btn btn-primary btn-rond" id="confirmBtn" (click)="createObjet()" > Creer nouvel objet </button>
 					<button class="btn btn-primary btn-rond " onclick="zoom('zoomOut');" href="#"><span class="glyphicon glyphicon-minus img-responsive" style="font-size: 20px"></span></button>
 					<button  class="btn btn-primary btn-lg" href="#">Info Site</button>  
 				</div><!-- /button_footer-->			
