@@ -189,7 +189,8 @@ export class BuildingService {
 	spacesOfAFloor.forEach( (space) =>{
 		
 				var newSpace = new Space();	
-				
+				 
+				 
 				newSpace.reference = space.spaceRef;
 				newSpace.id_space = space.spaceId;
 				newSpace.id_floor = floorId;
