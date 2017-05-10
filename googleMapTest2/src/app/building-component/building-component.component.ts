@@ -86,7 +86,7 @@ export class BuildingComponent implements OnInit {
   initPage(){
 	  
 	  this.building_data = new Building();
-	  
+	  this.currentFloor = null;
 	 this.buildingService.getDataOfABuild(this.buildingId) // recupere les données d'un batiment via son id
     .subscribe(
 		(building : Building )  => {
@@ -174,6 +174,8 @@ export class BuildingComponent implements OnInit {
   
   // Dessine un etage donné
   drawFloor(floor : Floor){	 
+  
+      if(this.currentFloor == floor){return;}//quitte si etage deja dessisner
   
 	//ajout - ACTIVation BOUTON CREATION piece
 	
@@ -365,6 +367,10 @@ export class BuildingComponent implements OnInit {
 	  if(this.selectedReader){
 		 	this.setLastSelectedReaderAtDefaut();
 	  }
+	  /*on place la pidce du reader et le reader sur le premier par rapport a l'arborescence */
+		   var g = circleSelect.parentNode.parentNode;
+		 console.log(g);
+		 g.appendChild(circleSelect.parentNode);
 	  
 	  this.selectedReader = circleSelect; // conserve le reader selectionne	  
 	  this.spaceIndex = circleSelect.parentNode.id.match(/[0-9]+/g)[0]; //l'index de l'espace dans la tablea des espaces (variable de données)   
@@ -478,6 +484,12 @@ export class BuildingComponent implements OnInit {
 		  this.selectedReader.setAttribute('cy',polygon.points[0].y);	
 		  newParent.appendChild(this.selectedReader)
 		
+		
+		
+				   var g = this.selectedReader.parentNode.parentNode;
+		 console.log(g);
+		 g.appendChild(this.selectedReader.parentNode);
+
 		   // on associe a la variable d'update du reader le nouvel espace
 		  this.readerUpdate.id_space = this.currentFloor.listSpaces[index].id_space;	
 	}

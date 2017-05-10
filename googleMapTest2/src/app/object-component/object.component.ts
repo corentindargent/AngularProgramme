@@ -25,6 +25,7 @@ export class ObjectComponent implements OnInit {
   
   @ViewChild('modal')  modalUpdate: ModalComponent;
   private siteId : number;
+  @Input() critereRecherche : any;
   
   //var ajout
   @Input()  newObject : Object;
@@ -40,6 +41,7 @@ export class ObjectComponent implements OnInit {
   //Liste de données
   objects_listes : Array<Object>;
 
+  //liste object test
   listObject : Array<any> =  [
 					{spaceId:0 ,reference:"Sac a dos",id_object:10},
 						{spaceId:1,reference:"Cartable",id_object:11},
@@ -52,13 +54,20 @@ export class ObjectComponent implements OnInit {
 	 this.route.params.forEach((params :Params) => {
 		this.siteId = +params['siteId'];		 
 	 });
-	 this.initPage();
+	 if(this.siteId){
+		this.initPage();
+	 }
+	 else{
+		console.log("pas d'id param");
+		this.newObject = new Object(); 		 
+	 }
   }
   
  
   initPage(){
 	  console.log(this.siteId);
 	  this.newObject = new Object(); 
+	//  this.critereRecherche = "";
 	  this.siteService.getAllObject(this.siteId)
 	  .subscribe(
 		(object : Array<Object>) => {
@@ -104,14 +113,14 @@ export class ObjectComponent implements OnInit {
  }
  
  confirmUpdateObjet(){
-	 this.modalUpdate.close();
 	 console.log("Ok");
 	 console.log(this.newObject);
-	  this.objectService.updateObject(this.newObject).subscribe(
+	 this.modalUpdate.close();
+	/*   this.objectService.updateObject(this.newObject).subscribe(
 			obj => {console.log('create new object'+obj);
 			 this.initPage(); },
 		  (err:any) => console.error(err) 
-		  );  
+		  );   */
  }
  
   selectingObject(i:number){
@@ -121,4 +130,27 @@ export class ObjectComponent implements OnInit {
 	  this.newObject.id_object = this.listObject[i].id_object;	
   }
 
+  searchObject(){
+	  console.log(this.critereRecherche);
+	  
+	  if(this.critereRecherche){
+	  this.objectService.searchObject(this.critereRecherche)
+	  .subscribe(
+		(object : Object) => {
+			console.log(object);		
+			
+			if(object){
+				this.objects_listes .splice(0);
+				this.objects_listes[0] = object;				
+			}
+		},
+		(err:any) => {console.error(err); console.log(err.body)}
+	  );
+	  this.critereRecherche = "";
+	}
+	
+  }
+  
+  
+   
 }

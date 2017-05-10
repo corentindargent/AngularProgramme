@@ -12,7 +12,7 @@
 		<script src="http://d3js.org/d3.v3.min.js" ></script>
 		
 	    <style>
-			.selectObject{background : #879492; color:white;}
+			.selectObject{ color:#6F7C7A;}
 		</style>
 </head>
 
@@ -48,12 +48,12 @@
 				  </li>
 				  </ul><!--/navbar-nav-->
 				  
-				  <form class="navbar-form navbar-right inline-form"> <!--form recherche obj-->
+				  <form #form="ngForm" class="navbar-form navbar-right inline-form"> <!--form recherche obj-->
 					<div class="form-group">
-					  <input type="search" class="input-sm form-control" placeholder="Recherche">
-					  <button type="submit" class="btn btn-primary btn-sm"><span class="glyphicon glyphicon-eye-open"></span> Chercher</button>
+					  <input #reference="ngModel" name="recherche" type="search" class="input-sm form-control" placeholder="Recherche" [(ngModel)]="critereRecherche">
+					  <button type="submit" class="btn btn-primary btn-sm" (click)="searchObject()"><span class="glyphicon glyphicon-eye-open"></span> Chercher</button>
 					</div>
-				 </form> <!-- /form recherche obj-->
+				   </form> <!-- /form recherche obj-->
 
 			  </div><!--/container-->
 		</nav>
@@ -115,24 +115,33 @@
 					  <thead class="thead-default">
 						<tr>
 						  <th>#</th>
-						  <th>Emplacement</th>
+						  <th>Details objet</th>
 						  <th>Reference Objet</th>
 						  <th>Objet</th>
+						  <th>Date Detection</th>
+						  <th>Pièce localisé</th>
+						  <th>Batiment</th>
+						  <th>Site affecté</th>
 						</tr>
 					  </thead>
 					  <tbody>
-						<tr *ngFor="let object of listObject; let i = index">
+						<tr *ngFor="let object of objects_listes; let i = index">
 						  <th scope="row">{{index+1}}</th>
-						  <td>{{object.spaceId}}</td>
-						  <td (mouseover)="hoverI = i" [class.selectObject]="i == hoverI" (click)="selectingObject(i);" style="cursor: pointer; cursor: hand;">{{object.reference}}</td>
+						  <td><a [routerLink]="['/object/details',object.spaceId]">{{object.spaceId}}</a></td>
+						  <td ><a [class.selectObject]="selectedObject == object"  (click)="selectingObject(i);" style="cursor: pointer; cursor: hand;">{{object.reference}}</a></td>
 						  <td>{{object.id_object}}</td>
+						  <td>{{object.date_detection}}</td>						  
+						  <td>{{object.floorRef}}</td>
+						  <td>{{object.buildRef}}</td>
+						  <td>{{object.siteRef}}</td>
 						</tr>						
 					  </tbody>
 					</table>
 				</div> <!-- /tab de données-->
 				
 				
-				
+<!-- 										  <td (mouseover)="hoverI = i" [class.selectObject]="i == hoverI" (click)="selectingObject(i);" style="cursor: pointer; cursor: hand;">{{object.reference}}</td>
+ -->
 
 			</div>
 			
@@ -141,10 +150,11 @@
 		
 			<div class='row'>			
 				<div class="col-lg-12 text-center pb-5">
-					<button class="btn btn-primary btn-rond" id="confirmBtn" (click)="modal.open();" > Creer nouvel objet </button>
-					<button class="btn btn-primary btn-rond " [disabled]="!selectedObject" (click)="modalUpdate.open()" >Modifier Objet</button>					
+					<button *ngIf="!siteId" class="btn btn-primary btn-rond" id="confirmBtn" (click)="modal.open();" > Creer nouvel objet </button>
+					<button class="btn btn-primary btn-rond " [disabled]="!selectedObject" (click)="modalUpdate.open()" >Modifier Reference Objet</button>					
 				</div><!-- /button_footer-->			
 			</div><!-- /row-->	
+			
 				
 		</div>
 		

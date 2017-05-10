@@ -62,6 +62,8 @@ export class ObjetService {
 	}
 	
 	searchObject(objectRef : string){
+		console.log("Deb search");
+		console.log(objectRef);
 		let headers  = new Headers({ 'Accept': 'application/json','Authorization':'Bearer token' }); 
         let options  = new RequestOptions({ headers: headers });
 		
@@ -71,14 +73,20 @@ export class ObjetService {
 		  .map((res:Response) => res.json())
 	      .map((obj:Array<any>) => {
 		  let result:Object = new Object();
+			  console.log(obj);
 			  if(obj)
 			  {
+				  
 					result.reference = obj[0].objectRef;
 					result.spaceRef = obj[0].spaceRef;
 					result.id_object = obj[0].objectId;
 											
 					//console.log(result);							
-			  }  
+			  } 
+			  else{
+				result = null;
+			  }			  
+			  console.log("end search");
 			  return result;
 	      })
 		 .catch(ObjetService.handleError);	   
@@ -107,6 +115,29 @@ export class ObjetService {
 		})
 		.catch(ObjetService.handleError);	 		
 		
+	}
+	
+	
+	getObjectHistorical(objectId : number)
+	{
+		let headers  = new Headers({ 'Accept': 'application/json','Authorization':'Bearer token' }); 
+        let options  = new RequestOptions({ headers: headers });
+		
+		/* return this.http.get(this.baseUrl+"/search?ref="+objectRef,options)
+		  .map((res:Response) => res.json())
+	      .map((obj:Array<any>) => {
+		  let result:Object = new Object();
+			  if(obj)
+			  {
+					result.reference = obj[0].objectRef;
+					result.spaceRef = obj[0].spaceRef;
+					result.id_object = obj[0].objectId;
+											
+					//console.log(result);							
+			  }  
+			  return result;
+	      })
+		 .catch(ObjetService.handleError); */
 	}
 	
 	

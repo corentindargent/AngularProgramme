@@ -187,7 +187,8 @@ export class BuildingService {
 	let result : Array<Space> = [];	
 	
 	spacesOfAFloor.forEach( (space) =>{
-		
+		console.log("espace");		
+		console.log(space);
 				var newSpace = new Space();	
 				
 				newSpace.reference = space.spaceRef;
@@ -195,6 +196,10 @@ export class BuildingService {
 				newSpace.id_floor = floorId;
 				newSpace.polygon = this.convertStringPolygon(space.spacePolygon);							
 				newSpace.listReaders = this.constructReadersOfSpace(space.spaceId,space.readers);
+				
+				console.log("Object space");
+				console.log(space.objects);
+				
 				newSpace.tabObjects = space.objects;
 			
 				result.push(newSpace);
@@ -206,7 +211,7 @@ export class BuildingService {
   
   constructReadersOfSpace(spaceId : number,readerOfASpace:Array<any>):Array<any>{
 	  
-	  console.log("ya");
+	  
 	  let result:Array<Reader> = [];
 	  
 	  readerOfASpace.forEach((reader) => {
@@ -219,7 +224,7 @@ export class BuildingService {
 		  newReader.id_space = spaceId;
 		  
 		  
-		  console.log(newReader);
+		  
 		  result.push(newReader);
 	  });
 	  return  result;	

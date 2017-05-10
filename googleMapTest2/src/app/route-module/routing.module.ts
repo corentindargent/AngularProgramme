@@ -17,6 +17,7 @@ export const routes: Routes = [
   { path: 'home',  component: AppComponent },
   { path: 'newPolygon',  component: NewShapesComponent },
   { path: 'object/:siteId',  component: ObjectComponent },
+  { path: 'objects',  component: ObjectComponent },
   { path: 'object/details/:objectId',  component: ObjectDetailComponent },
   { path: 'tag',  component: TagComponent },
 ];

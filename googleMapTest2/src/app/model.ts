@@ -146,17 +146,34 @@ export class Reader     {
 
 export class Object {
 
+//attr entite
   id_object : number;
   reference : string;
+  
+//attr en + pour listing  
   spaceRef : string;
   spaceId : number;
+  buildId : number;
+  floorRef : string;
+  buildRef : string;
+  siteRef : string;
+  date_detection:any;
+  
   
   constructor()
   {
 	 this.id_object = -1;
 	 this.reference = ""; 
+	 
 	 this.spaceRef = "";	
-	 this.spaceId = null;	 
+	 this.spaceId = null;	
+	 this.buildId = null;
+	 this.floorRef = "";
+	 this.siteRef = "";
+	 this.buildRef = "";
+	 this.date_detection = null
+	 
+	 
   }   
 }
 

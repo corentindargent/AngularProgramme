@@ -32,6 +32,12 @@
 		font-size: larger;
 		
 	}
+	
+	.selectFloor{
+		font-size: larger;
+		color:#01A1FE;
+		
+	}
     </style>
 
     <link href="/css/bootstrap.min.css" rel="stylesheet">
@@ -52,7 +58,7 @@
 	<nav class="navbar navbar-inverse">
 		  <div class="container-fluid">
 			<div class="navbar-header">
-			  <a class="navbar-brand"> Traxxeo</a>
+			  <a class="navbar-brand" href="#"> Traxxeo</a>
 			</div><!--/navBar header-->
 			
 			<ul class="nav navbar-nav">
@@ -68,29 +74,9 @@
 	
 	<div class="container-fluid">
 	    <div class="row">
-			<div class="col-lg-1 "> 
-				<ul>
-					<button *ngFor="let floor of building_data.listFloor; let i = index"
-					(click)="drawFloor(floor,index)">							
-						 {{ floor.reference }} 
-					</button>
-				</ul>
-						
-
-			</div>
-			
-			<div class="col-lg-7 col-lg-offset-1 ">
-				 <svg #svg id="svg" height="700" width="700" >
-				 </svg>	
-			</div>
-			
-			<div class="col-lg-3 ">
-				<button  id="send" type="submit" (click)="drawOnSvg()"  class="btn btn-default" [disabled]="notYetFloor"  >New space</button>
-			<br /><br />
-			
-			<div class="row">	
-			
-				<div class="panel-group"><!-- tableauInfo -->				
+			<div class="col-lg-3 "> 
+				<div class="row">					
+					<div class="panel-group"><!-- tableauInfo -->				
 					<div class="panel panel-primary"> <!-- titre panneau -->
 						<div class="panel-heading"><!-- panel heading -->
 							<h1>Batiment selectionné : {{building_data.reference}}</h1>
@@ -98,9 +84,9 @@
 					
                          <div class="panel-body">
 							<ul>
-								<li *ngFor=" let floor of building_data.listFloor" [class.selectFloor]="floor == currentFloor"(click)="drawFloor(floor,index)"
-								style="cursor:pointer"><!--liste de floor of build-->
-									Etage {{floor.order_number}}  {{floor.reference}}
+								<li *ngFor=" let floor of building_data.listFloor" (click)="drawFloor(floor,index)"
+								><!--liste de floor of build-->
+									<a style="cursor:pointer" [class.selectFloor]="floor == currentFloor"> Etage {{floor.order_number}}  {{floor.reference}}</a>
 									 <ul *ngIf="floor == currentFloor">								
 										<li *ngFor="let space of floor.listSpaces let i = index" >	<!--liste de floor of build-->						
 												Space : {{space.reference }} 
@@ -122,6 +108,21 @@
 						 </div>
 					</div> <!-- /titre panneau -->
 				</div><!-- /tableauInfo -->	
+				</div> <!-- /row -->
+			</div> <!-- /col-lg-3 -->
+			
+			<div class="col-lg-7 ">
+				 <svg #svg id="svg" height="700" width="700" >
+				 </svg>	
+			</div>
+			
+			<div class="col-lg-2 ">
+				<button  id="send" type="submit" (click)="drawOnSvg()"  class="btn btn-default" [disabled]="notYetFloor"  >New space</button>
+			<br /><br />
+			
+			<div class="row">	
+			
+				
 				
 			</div> <!-- /row -->
 			<div class="row">
