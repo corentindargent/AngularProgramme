@@ -13,10 +13,9 @@ export class ObjetService {
   constructor(private http : Http) { }
   
   static handleError (error : Response){
-	  console.log("Error catch");
-	  console.error(error);
-	  console.log(error.json());
-	  return Observable.throw(error.json().error || 'Server error');	  
+	  console.log("Error catch");	  	 
+	  return Observable.throw(error);
+	 // return Observable.throw(error.json().error || 'Server error');	  
 	  
   }
    
@@ -71,15 +70,24 @@ export class ObjetService {
 		
 		return this.http.get(this.baseUrl+"/search?ref="+objectRef,options)
 		  .map((res:Response) => res.json())
-	      .map((obj:Array<any>) => {
+	      .map((obj:any) => {
 		  let result:Object = new Object();
 			  console.log(obj);
 			  if(obj)
 			  {
 				  
-					result.reference = obj[0].objectRef;
-					result.spaceRef = obj[0].spaceRef;
-					result.id_object = obj[0].objectId;
+									
+					 result.reference = obj.objectRef;					 
+					 result.id_object = obj.objectId;	
+					
+
+					  result.date_detection = obj.timestamp;
+					  
+					  result.spaceRef = obj.spaceRef;					  
+					   result.buildId = obj.buildingId;
+					   result.floorRef = obj.floorRef;
+					   result.buildRef = obj.buildingRef;
+					   result.siteRef = obj.siteRef;
 											
 					//console.log(result);							
 			  } 
@@ -103,10 +111,22 @@ export class ObjetService {
 		  let result:Array<Object> = [];			 
 		  if(objects)
 		  {
-				objects.forEach( (obj) =>{					
+				objects.forEach( (obj) =>{	
+console.log(obj);				
 					var object = new Object();					
-					 object.reference = obj.reference;					 
-					 object.id_object = obj.object_id;					
+					 object.reference = obj.objectRef;					 
+					 object.id_object = obj.objectId;	
+					
+
+					  object.date_detection = obj.timestamp;
+					  
+					  object.spaceRef = obj.spaceRef;					  
+					   object.buildId = obj.buildingId;
+					   object.floorRef = obj.floorRef;
+					   object.buildRef = obj.buildingRef;
+					   object.siteRef = obj.siteRef;
+					 
+					 
 					result.push(object);
 				});
 		  }

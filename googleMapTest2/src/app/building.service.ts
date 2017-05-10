@@ -187,8 +187,7 @@ export class BuildingService {
 	let result : Array<Space> = [];	
 	
 	spacesOfAFloor.forEach( (space) =>{
-		console.log("espace");		
-		console.log(space);
+		
 				var newSpace = new Space();	
 				
 				newSpace.reference = space.spaceRef;

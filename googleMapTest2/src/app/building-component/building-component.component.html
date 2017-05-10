@@ -231,19 +231,7 @@
 							class="alert alert-danger validation-message"> Espace doit etre selectionne </p>
 							
 						  </div><!--/input space -->
-							
-							
-						  <!--INPUT space  -->
-						 <!--  <div class="form-group">
-							<label for="space">Space:</label>
-							<input disabled="disabled" #MacAddress="ngModel" type="text" class="form-control required" id="space" required
-							[(ngModel)] = "newReader.id_space" name="space" />
-						  
-							<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
-							class="alert alert-danger validation-message"> Numero de l'étage requis </p>
-							
-						  </div>--><!--/input space --> 
-						  
+			
 						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
 						  <button id="send" type="submit" (click)="confirmAddNewReader()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
 						</form>

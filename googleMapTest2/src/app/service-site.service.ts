@@ -208,9 +208,15 @@ export class SiteService {
 				objects.forEach( (obj) =>{
 					
 					var object = new Object();					
-					 object.reference = obj.objectRef;
-					 object.spaceId = obj.spaceId;
-					 object.id_object = obj.objectId;					
+					 object.reference = obj.objectRef;					 
+					 object.id_object = obj.objectId;	
+					  object.spaceRef = obj.spaceRef;					  
+					   object.buildId = obj.buildingId;
+					   object.floorRef = obj.floorRef;
+					   object.buildRef = obj.buildingRef;
+					   object.siteRef = obj.siteRef;
+					  object.date_detection = obj.timestamp;
+					  
 					result.push(object);
 				});
 		  }

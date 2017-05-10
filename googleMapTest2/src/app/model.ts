@@ -79,7 +79,7 @@ export class Floor   {
 	this.y = -1;
 	this.x = -1;
 	this.z = -1;
-	this.order_number = -1;
+	this.order_number = -1; 
 	this.id_building = -1;
 	this.polygon = null;
 	this.id_floor = -1;  
@@ -136,7 +136,7 @@ export class Reader     {
 	this.x = -1;
 	this.z = -1;
 	this.fixed = null;
-	this.mac = "";
+	this.mac = null; // non modifiable
 	this.id_space = -1;
 	this.id_reader = -1; 
     this.Last_Data_Event_Id = null; 	

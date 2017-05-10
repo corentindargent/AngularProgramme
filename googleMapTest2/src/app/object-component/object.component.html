@@ -110,8 +110,8 @@
 				</modal-footer>
 			</modal>
 				
-				<div class="col-lg-offset-2 col-lg-8 col-lg-offset-2"> <!-- tab de données-->
-					<table class="table">
+				<div class="col-lg-offset-1 col-lg-10 col-lg-offset-1"> <!-- tab de données-->
+					<table class="table table-bordered">
 					  <thead class="thead-default">
 						<tr>
 						  <th>#</th>
@@ -120,18 +120,20 @@
 						  <th>Objet</th>
 						  <th>Date Detection</th>
 						  <th>Pièce localisé</th>
+						  <th>Etage</th>
 						  <th>Batiment</th>
 						  <th>Site affecté</th>
 						</tr>
 					  </thead>
 					  <tbody>
 						<tr *ngFor="let object of objects_listes; let i = index">
-						  <th scope="row">{{index+1}}</th>
-						  <td><a [routerLink]="['/object/details',object.spaceId]">{{object.spaceId}}</a></td>
-						  <td ><a [class.selectObject]="selectedObject == object"  (click)="selectingObject(i);" style="cursor: pointer; cursor: hand;">{{object.reference}}</a></td>
+						  <td scope="row">{{i+1}}</td>
+						  <td><a [routerLink]="['/object/details',object.id_object]">{{object.id_object}}</a></td>
+						  <td ><p [class.selectObject]="selectedObject == object"  (click)="selectingObject(i);" style="cursor: pointer; cursor: hand;">{{object.reference}}</p></td>
 						  <td>{{object.id_object}}</td>
-						  <td>{{object.date_detection}}</td>						  
-						  <td>{{object.floorRef}}</td>
+						  <td>{{object.date_detection}}</td>
+						  <td>{{object.spaceRef}}</td>
+						  <td>{{object.floorRef}}</td>						  
 						  <td>{{object.buildRef}}</td>
 						  <td>{{object.siteRef}}</td>
 						</tr>						

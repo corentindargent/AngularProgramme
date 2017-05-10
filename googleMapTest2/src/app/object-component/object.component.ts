@@ -23,7 +23,7 @@ export class ObjectComponent implements OnInit {
   @ViewChild(NguiPopupComponent) popup: NguiPopupComponent;  
   @ViewChild('modal')  modal: ModalComponent;
   
-  @ViewChild('modal')  modalUpdate: ModalComponent;
+  @ViewChild('modalUpdate')  modalUpdate: ModalComponent;
   private siteId : number;
   @Input() critereRecherche : any;
   
@@ -34,7 +34,7 @@ export class ObjectComponent implements OnInit {
   //var update
   private mouse_hover : boolean;
   private selectedObject : any;
-  
+  private lastSelected : number;
   
   
   
@@ -54,27 +54,40 @@ export class ObjectComponent implements OnInit {
 	 this.route.params.forEach((params :Params) => {
 		this.siteId = +params['siteId'];		 
 	 });
-	 if(this.siteId){
+	
 		this.initPage();
-	 }
-	 else{
-		console.log("pas d'id param");
-		this.newObject = new Object(); 		 
-	 }
+	 
   }
   
  
   initPage(){
-	  console.log(this.siteId);
+	  
+	  this.critereRecherche = "";
 	  this.newObject = new Object(); 
-	//  this.critereRecherche = "";
+	  
+	// SI SITEDID TRUE LIST OBJECT D'UN SITE DONNE
+	if(this.siteId){ 
+		console.log(this.siteId); 
 	  this.siteService.getAllObject(this.siteId)
 	  .subscribe(
 		(object : Array<Object>) => {
+			//console.log(object);
 			this.objects_listes = object;
 		},
 		(err:any) => {console.error(err); console.log(err.body)}
 	  );
+	}
+	else//lising de tous les object
+	{
+		this.objectService.getAllObjects()
+		.subscribe(
+			(object : Array<Object>) => {			
+			this.objects_listes = object;			
+		},
+		(err:any) => {console.error(err); console.log(err.body)}
+	  );  
+				
+	}
   }
   
     /*Method fenetre pop-up*/
@@ -116,18 +129,27 @@ export class ObjectComponent implements OnInit {
 	 console.log("Ok");
 	 console.log(this.newObject);
 	 this.modalUpdate.close();
-	/*   this.objectService.updateObject(this.newObject).subscribe(
+	  this.objectService.updateObject(this.newObject).subscribe(
 			obj => {console.log('create new object'+obj);
 			 this.initPage(); },
 		  (err:any) => console.error(err) 
-		  );   */
+		  );  
+	  
  }
  
   selectingObject(i:number){
 	  console.log(i);
-	  this.selectedObject = this.listObject[i];
-	  this.newObject.reference = this.listObject[i].reference;	  
-	  this.newObject.id_object = this.listObject[i].id_object;	
+	  if(this.lastSelected == i){//si le nouveau selectionne == dernier selcetionne 
+		  this.lastSelected = null;
+		  this.selectedObject = null;
+	  }
+	  else
+	  {
+		  this.lastSelected = i;
+		  this.selectedObject = this.objects_listes[i];
+		  this.newObject.reference = this.objects_listes[i].reference;	  
+		  this.newObject.id_object = this.objects_listes[i].id_object;	
+	  }
   }
 
   searchObject(){
@@ -141,12 +163,12 @@ export class ObjectComponent implements OnInit {
 			
 			if(object){
 				this.objects_listes .splice(0);
-				this.objects_listes[0] = object;				
+				this.objects_listes[0] = object;
 			}
 		},
-		(err:any) => {console.error(err); console.log(err.body)}
+		(err:any) => {console.error(); alert("Aucune objet trouvé")}
 	  );
-	  this.critereRecherche = "";
+	  this.critereRecherche = "";	
 	}
 	
   }
