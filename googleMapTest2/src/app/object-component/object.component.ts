@@ -147,12 +147,12 @@ export class ObjectComponent implements OnInit {
 	  if(this.critereRecherche){
 	  this.objectService.searchObject(this.critereRecherche)
 	  .subscribe(
-		(object : Object) => {
+		(object : Array<Object>) => {
 			console.log(object);		
 			
 			if(object){
-				this.objects_listes .splice(0);
-				this.objects_listes[0] = object;
+
+				this.objects_listes = object;
 			}
 		},
 		(err:any) => {console.error(); alert("Aucune objet trouvé")}

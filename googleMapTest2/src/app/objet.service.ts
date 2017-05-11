@@ -70,33 +70,32 @@ export class ObjetService {
 		
 		return this.http.get(this.baseUrl+"/search?ref="+objectRef,options)
 		  .map((res:Response) => res.json())
-	      .map((obj:any) => {
-		  let result:Object = new Object();
-			  console.log(obj);
-			  if(obj)
-			  {
-				  
-									
-					 result.reference = obj.objectRef;					 
-					 result.id_object = obj.objectId;	
+	       .map((objects:Array<any>) => {
+		  let result:Array<Object> = [];			 
+		  if(objects)
+		  {
+				objects.forEach( (obj) =>{	
+				
+					var object = new Object();					
+					 object.reference = obj.objectRef;					 
+					 object.id_object = obj.objectId;	
 					
 
-					  result.date_detection = obj.timestamp;
+					  object.date_detection = obj.timestamp;
 					  
-					  result.spaceRef = obj.spaceRef;					  
-					   result.buildId = obj.buildingId;
-					   result.floorRef = obj.floorRef;
-					   result.buildRef = obj.buildingRef;
-					   result.siteRef = obj.siteRef;
-											
-					//console.log(result);							
-			  } 
-			  else{
-				result = null;
-			  }			  
-			  
+					  object.spaceRef = obj.spaceRef;					  
+					   object.buildId = obj.buildingId;
+					   object.floorRef = obj.floorRef;
+					   object.buildRef = obj.buildingRef;
+					   object.siteRef = obj.siteRef;
+					 
+					 
+					result.push(object);
+				});
+		  }
 			  return result;
-	      })
+	      
+		})
 		 .catch(ObjetService.handleError);	   
 	}
 	

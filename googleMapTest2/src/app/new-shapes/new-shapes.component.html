@@ -96,12 +96,12 @@
 			
 			<ul class="nav navbar-nav">
 			
-			  				  <li><a class="pointer" [ngClass]="{'disableClick':polygonNonAffiche}"  (click)="addPolygons(false);">Nouveau batiment</a></li>
-								<li><a  class="pointer" [ngClass]="{'disableClick':polygonNonAffiche}" (click)="modificationSite();">Modif site</a></li>
-								
-								<li><a class="pointer" [ngClass]="{'disableClick':polygonNonAffiche}"  (click)="modificationBuilding();">Modif Building</a></li>
-								
 			  <li><a  id="newSite" class="pointer" [ngClass]="{'disableClick':polygonNonAffiche}"   (click)="addPolygons(true);">Nouveau site</a></li>
+								<li><a  class="pointer" [ngClass]="{'disableClick':polygonNonAffiche}" (click)="modificationSite();">Modification site</a></li>
+								
+			  				  <li><a class="pointer" [ngClass]="{'disableClick':polygonNonAffiche}"  (click)="addPolygons(false);">Nouveau batiment</a></li>
+								<li><a class="pointer" [ngClass]="{'disableClick':polygonNonAffiche}"  (click)="modificationBuilding();">Modification batiment</a></li>
+								
 			  
 			  
 			</ul><!--/navbar-nav-->
@@ -120,7 +120,7 @@
 			
 			<!-- FORMUALIRE AJOUT/MODIF D'1 SITE/BUILDING -->	
 			
-		   <div class="col-lg-3 col-lg-offset-1">
+		   <div class="col-lg-3 col-lg-offset-1 ">
 			
 			
 				<!--CREATION NEW SITE-->
@@ -183,8 +183,8 @@
 						  <div class="form-group"><!-- select-->
 							<label for="site_id"> Site: </label>
 							<select  #selectSite="ngModel" class="form-control"  id="site_id" name="site_id" [(ngModel)]="newBuilding.site_id" >
-								<option *ngFor="let site of sites_list"
-								[value]="site.site_id">Site : {{site.site_id }}</option>							
+								<option *ngFor="let site of sites_list; let i = index" (click)="siteForNewBuilding(i)"
+								[value]="site.site_id"> {{site.reference}} </option>							
 							</select>
 							<!-- <p *ngIf="selectSite.control.hasError('required')"
 							class="alert alert-danger validation-message">Veuillez selectionner un Site</p> -->
@@ -192,7 +192,7 @@
 						  
 						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}</div>			  
 						  <button id="send" type="submit" (click)="confirmAddNewBuilding()"  class="btn btn-default" [disabled]="formBuilding.invalid" >Submit</button>					
-						</form>	
+						</form>	 
 					</div><!-- form batiment-->
 					
 				<!--/fin CREATION NEW BUILDING-->

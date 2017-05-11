@@ -157,8 +157,7 @@ export class AppComponent implements OnInit,AfterContentChecked  {
 		this.lastSelected = i;
 		
 		//centre la map sur le site
-		console.log("center map");
-		 console.log(this.listePolygon[this.lastSelected].site.getPath().getAt(0))
+		
 		this.map.setCenter(this.listePolygon[this.lastSelected].site.getPath().getAt(0));
 		this.map.setZoom(18);
 		
