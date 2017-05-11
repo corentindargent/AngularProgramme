@@ -12,7 +12,7 @@
 		<script src="http://d3js.org/d3.v3.min.js" ></script>
 		
 	    <style>
-			.selectObject{ color:#6F7C7A;}
+			
 		</style>
 </head>
 
@@ -113,32 +113,63 @@
 				<div class="col-lg-offset-1 col-lg-10 col-lg-offset-1"> <!-- tab de données-->
 					<table class="table table-bordered">
 					  <thead class="thead-default">
-						<tr>
+						<tr>					
 						  <th>#</th>
-						  <th>Details objet</th>
-						  <th>Reference Objet</th>
-						  <th>Objet</th>
-						  <th>Date Detection</th>
-						  <th>Pièce localisé</th>
-						  <th>Etage</th>
-						  <th>Batiment</th>
-						  <th>Site affecté</th>
+						  
+						  <th class="pointer" (click)="sort('id_object')">
+							 Details objet
+							<i class="fa" [ngClass]="{'fa-sort': column != 'id_object', 'fa-sort-asc': (column == 'id_object' && isDesc), 'fa-sort-desc': (column == 'id_object' && !isDesc) }" aria-hidden="true"> </i>
+						  </th>
+						  
+						 <th class="pointer" (click)="sort('reference')">
+							    Reference Objet
+							  <i class="fa" [ngClass]="{'fa-sort': column != 'reference', 'fa-sort-asc': (column == 'reference' && isDesc), 'fa-sort-desc': (column == 'reference' && !isDesc) }" aria-hidden="true"> </i>
+						 </th>	
+						 
+						 <th class="pointer" (click)="sort('date_detection')">
+								Date Detection
+							  <i class="fa" [ngClass]="{'fa-sort': column != 'date_detection', 'fa-sort-asc': (column == 'date_detection' && isDesc), 'fa-sort-desc': (column == 'date_detection' && !isDesc) }" aria-hidden="true"> </i>
+						 </th>
+						 
+						 <th class="pointer" (click)="sort('spaceRef')">
+							   Pièce localisé
+						   <i class="fa" [ngClass]="{'fa-sort': column != 'spaceRef', 'fa-sort-asc': (column == 'spaceRef' && isDesc), 'fa-sort-desc': (column == 'spaceRef' && !isDesc) }" aria-hidden="true"> </i>
+						 </th>
+						 
+						 <th class="pointer" (click)="sort('floorRef')">
+							    Etage
+						   <i class="fa" [ngClass]="{'fa-sort': column != 'floorRef', 'fa-sort-asc': (column == 'floorRef' && isDesc), 'fa-sort-desc': (column == 'floorRef' && !isDesc) }" aria-hidden="true"> </i>
+						 </th>
+						 
+						  <th class="pointer" (click)="sort('buildRef')" >
+								Batiment
+							 <i class="fa" [ngClass]="{'fa-sort': column != 'buildRef', 'fa-sort-asc': (column == 'buildRef' && isDesc), 'fa-sort-desc': (column == 'buildRef' && !isDesc) }" aria-hidden="true"> </i>
+						  </th>
+						  
+						  <th class="pointer" (click)="sort('siteRef')">
+								Site affecté
+						     <i class="fa" [ngClass]="{'fa-sort': column != 'siteRef', 'fa-sort-asc': (column == 'siteRef' && isDesc), 'fa-sort-desc': (column == 'siteRef' && !isDesc) }" aria-hidden="true"> </i>
+						  </th>
+						  
 						</tr>
 					  </thead>
-					  <tbody>
-						<tr *ngFor="let object of objects_listes; let i = index">
+					  <tbody><!-- sortType: sortReverse -->
+					  
+						<tr *ngFor="let object of objects_listes | orderBy: {property: column, direction: direction} ; let i = index">
 						  <td scope="row">{{i+1}}</td>
 						  <td><a [routerLink]="['/object/details',object.id_object]">{{object.id_object}}</a></td>
-						  <td ><p [class.selectObject]="selectedObject == object"  (click)="selectingObject(i);" style="cursor: pointer; cursor: hand;">{{object.reference}}</p></td>
-						  <td>{{object.id_object}}</td>
+						  <td ><p [class.selectObject]="selectedObject == object"  (click)="selectingObject(i);" style="cursor: pointer; cursor: hand;">{{object.reference}}</p></td>						 
 						  <td>{{object.date_detection}}</td>
 						  <td>{{object.spaceRef}}</td>
 						  <td>{{object.floorRef}}</td>						  
-						  <td>{{object.buildRef}}</td>
+						  <td>{{object.buildRef}}</td>						  
 						  <td>{{object.siteRef}}</td>
 						</tr>						
 					  </tbody>
 					</table>
+					
+					<!-- <ng2-smart-table [settings]="settings" [source]="objects_listes | async"></ng2-smart-table> -->
+					
 				</div> <!-- /tab de données-->
 				
 				

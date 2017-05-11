@@ -94,7 +94,7 @@ export class ObjetService {
 			  else{
 				result = null;
 			  }			  
-			  console.log("end search");
+			  
 			  return result;
 	      })
 		 .catch(ObjetService.handleError);	   
@@ -112,7 +112,7 @@ export class ObjetService {
 		  if(objects)
 		  {
 				objects.forEach( (obj) =>{	
-console.log(obj);				
+				
 					var object = new Object();					
 					 object.reference = obj.objectRef;					 
 					 object.id_object = obj.objectId;	

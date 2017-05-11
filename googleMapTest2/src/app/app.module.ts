@@ -27,11 +27,11 @@ import {ReaderService} from './reader.service';
 import {ObjetService} from'./objet.service';
 import {TagService} from'./tag.service';
 
-
+import {OrderByPipe} from './custom-pipe';
 
 @NgModule({
   declarations: [
-    AppComponent,GoogleMapComponentComponent, NewShapesComponent, BuildingComponent, RootComponent, ObjectComponent, ObjectDetailComponent, TagComponent
+    AppComponent,GoogleMapComponentComponent, NewShapesComponent, BuildingComponent, RootComponent, ObjectComponent, ObjectDetailComponent, TagComponent,OrderByPipe
   ],
   imports: [
     BrowserModule,
@@ -39,7 +39,7 @@ import {TagService} from'./tag.service';
     HttpModule,
 	RoutingModule,
 	NguiPopupModule,
-	Ng2Bs3ModalModule	
+	Ng2Bs3ModalModule,	
   ],
   providers: [GMapService,SiteService,BuildingService,SpaceService,FloorService,ReaderService,ObjetService,TagService],
   bootstrap: [RootComponent]

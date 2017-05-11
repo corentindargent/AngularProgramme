@@ -52,6 +52,8 @@ export class BuildingComponent implements OnInit {
 	  isANewReader : boolean = false; //affiche form html
 	  lastSelectedSpace  : any;
 	  shapeNewReader : any; // forme shape reader
+	  
+	  notYetFloor : boolean; //deactive action du reader espace si pas le batiment possede pas encore de floor
 
    
   //VAR - MODIFICATION SPACES  
@@ -164,10 +166,12 @@ export class BuildingComponent implements OnInit {
 	  
 		if(this.building_data.listFloor[0])// si le batiment comprend etage 
 		{
+			this.notYetFloor = true;
 			this.drawFloor(this.building_data.listFloor[0]);// dessine la forme de l'etage
 		}
 		else
 		{
+			this.notYetFloor = false;
 			this.init();	// on dessine la forme du batiment (avec une conversion COORD GOOGLEMAPS en XY SVG)				
 		} 
   }
@@ -229,9 +233,18 @@ export class BuildingComponent implements OnInit {
 					  
 					   console.log(element);
 						var circle = g_space.append('circle')
+						
+						  //si forme reader cercle
 							.attr("cx", element.x)
 							.attr("cy", element.y)
 							.attr('r', 4)
+							
+							//si forme reader rect
+							/* .attr("x", element.x)
+							.attr("y", element.y)
+							.attr('width', 4)
+							.attr('height', 4) */
+							
 							.attr('fill', '#81DAF5')
 							.attr('stroke', 'black')
 							.attr('is-handle', 'true')

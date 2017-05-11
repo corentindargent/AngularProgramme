@@ -4,3 +4,47 @@
 			fill: #FB0019;
 	}
 	
+	.pointer{
+    cursor: pointer;
+}
+
+
+ #svg {
+		background:silver;
+		border: black thick  1px;
+	}
+	
+	g {
+		fill:red;
+	}
+	body{
+		padding : 0px 10px;
+	}
+	
+.select {
+			
+			stroke-width: 3;
+			fill: #00FE08;
+	}
+	
+	#selected
+	{
+		border: black thick  1px;
+	}
+	
+	#idPoly{stroke:black;stroke-width:2px;fill:yellow	}
+	
+	li.selectFloor{
+		font-size: larger;
+		
+	}
+	
+	.selectFloor{
+		font-size: larger;
+		color:#01A1FE;
+		
+	}
+	
+.disableClick{
+    pointer-events: none;
+}

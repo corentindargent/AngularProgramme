@@ -96,33 +96,13 @@
 			
 			<ul class="nav navbar-nav">
 			
-			  				  <li><a    (click)="addPolygons(false);">Nouveau batiment</a></li>
-								<li><a   (click)="modificationSite();">Modif site</a></li>
+			  				  <li><a class="pointer" [ngClass]="{'disableClick':polygonNonAffiche}"  (click)="addPolygons(false);">Nouveau batiment</a></li>
+								<li><a  class="pointer" [ngClass]="{'disableClick':polygonNonAffiche}" (click)="modificationSite();">Modif site</a></li>
 								
-								<li><a    (click)="modificationBuilding();">Modif Building</a></li>
+								<li><a class="pointer" [ngClass]="{'disableClick':polygonNonAffiche}"  (click)="modificationBuilding();">Modif Building</a></li>
 								
-			  <li><a  id="newSite" [ngClass]="{'disabled':isOneSite}"  (click)="addPolygons(true);">Nouveau site</a></li>
-			  <li class="active"><a href="#">Home</a></li>
-			  <li class="dropdown">
-				<a class="dropdown-toggle" data-toggle="dropdown" href="#">Nouvelle forme
-				<span class="caret"></span></a>
-				<ul class="dropdown-menu">
-				  <li><a href="#" id="newSite">Nouveau site</a></li>
-				  <li><a href="#" [ngClass]="{'disabled':isOneSite}"  (click)="addPolygons(false);">Nouveau batiment</a></li>
-				  <li><a href="#">Page 1-3</a></li>
-				</ul>
-			  </li>
-			  <li class="dropdown">
-				<a class="dropdown-toggle" data-toggle="dropdown" href="#">Modification
-				<span class="caret"></span></a>
-				<ul class="dropdown-menu">
-				  <li><a href="#" onclick="modificationSite();">Modification site</a></li>
-				  <li><a href="#" onclick="modificationBuilding();">Modification batiment</a></li>				  
-				</ul>
-			  </li>
+			  <li><a  id="newSite" class="pointer" [ngClass]="{'disableClick':polygonNonAffiche}"   (click)="addPolygons(true);">Nouveau site</a></li>
 			  
-			  <li><a href="#">Page 2</a></li>
-			  <li><a href="#">Page 3</a></li>
 			  
 			</ul><!--/navbar-nav-->
 			

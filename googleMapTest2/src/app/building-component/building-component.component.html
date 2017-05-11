@@ -2,43 +2,7 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <style>
-    #svg {
-		background:silver;
-		border: black thick  1px;
-	}
-	
-	g {
-		fill:red;
-	}
-	body{
-		padding : 0px 10px;
-	}
-	
-.select {
-			
-			stroke-width: 3;
-			fill: #00FE08;
-	}
-	
-	#selected
-	{
-		border: black thick  1px;
-	}
-	
-	#idPoly{style="stroke:black;stroke-width:2px;fill:yellow"	}
-	
-	li.selectFloor{
-		font-size: larger;
-		
-	}
-	
-	.selectFloor{
-		font-size: larger;
-		color:#01A1FE;
-		
-	}
-    </style>
+
 
     <link href="/css/bootstrap.min.css" rel="stylesheet">
 		<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -62,16 +26,17 @@
 			</div><!--/navBar header-->
 			
 			<ul class="nav navbar-nav">
-			<li><a id="newReader" [ngClass]="{'disabled':isOneSite}"  (click)="updateReader();">Update Reader</a></li>
-			<li><a id="newReader" [ngClass]="{'disabled':isOneSite}"  (click)="updateSpaces();">Update Space</a></li>
-			<li><a id="newReader" [ngClass]="{'disabled':isOneSite}"  (click)="createNewReader();">New Reader</a></li>				
-			<li><a id="newSite" [ngClass]="{'disabled':isOneSite}"  (click)="createNewFloor();">New Floor</a></li>
+			<li><a id="newFloor"  class="pointer" [ngClass]="{'disableClick':!notYetFloor}"  (click)="createNewFloor();">New Floor</a></li>
+			<li><a id="newReader" 	class="pointer" [ngClass]="{'disableClick':!notYetFloor}"  (click)="createNewReader();">New Reader</a></li>				
+			<li><a id="updateReader" class="pointer" [ngClass]="{'disableClick':!notYetFloor}"  (click)="updateReader();">Update Reader</a></li>
+			<li><a id="newSpace" 	class="pointer"[ngClass]="{'disableClick':!notYetFloor}"  (click)="drawOnSvg()" >New space</a></li>
+			<li><a id="updateSpace" class="pointer"	[ngClass]="{'disableClick':!notYetFloor}"  (click)="updateSpaces();">Update Space</a></li>
 			  			  
 			</ul><!--/navbar-nav-->
-			
+			<!-- [attr.disabled]="!notYetFloor" -->
 		  </div><!--/container-->
 	</nav>
-	
+
 	<div class="container-fluid">
 	    <div class="row">
 			<div class="col-lg-3 "> 
@@ -117,136 +82,58 @@
 			</div>
 			
 			<div class="col-lg-2 ">
-				<button  id="send" type="submit" (click)="drawOnSvg()"  class="btn btn-default" [disabled]="notYetFloor"  >New space</button>
-			<br /><br />
+				<button  id="send" type="submit" (click)="drawOnSvg()"  class="btn btn-default" [disabled]="!notYetFloor"  >New space</button>
+				<br /><br />
 			
-			<div class="row">	
-			
+				<div class="row">	
 				
-				
-			</div> <!-- /row -->
-			<div class="row">
-				
-				<!--FORMUALIRE NEW ETAGE-->
-				<div *ngIf="isANewFloor" >
-						<h1 [ngStyle]="{'color':'red'}" >Nouvelle Etage</h1>
-						<form #form="ngForm" id="formulaire"  class="simple-form" >
-						
-						  <div class="form-group">
-							<label for="nomEtage">Reference:</label>
-							<input #name="ngModel" type="text" class="form-control"  id="nomEtage"
-								[(ngModel)] = "newFloor.reference" 	name="nomEtage"	
-								required />
+					
+					
+				</div> <!-- /row -->
+				<div class="row">
+					
+					<!--FORMUALIRE NEW ETAGE-->
+					<div *ngIf="isANewFloor" >
+							<h1 [ngStyle]="{'color':'red'}" >Nouvelle Etage</h1>
+							<form #form="ngForm" id="formulaire"  class="simple-form" >
+							
+							  <div class="form-group">
+								<label for="nomEtage">Reference:</label>
+								<input #name="ngModel" type="text" class="form-control"  id="nomEtage"
+									[(ngModel)] = "newFloor.reference" 	name="nomEtage"	
+									required />
+									
+								<p *ngIf="name.control.hasError('required')&& (name.touched)"
+								class="alert alert-danger validation-message">Référence requise</p>
 								
-							<p *ngIf="name.control.hasError('required')&& (name.touched)"
-							class="alert alert-danger validation-message">Référence requise</p>
-							
-						  </div> <!--/input Nom -->
-						  
-						  <div class="form-group">
-							<label for="adressePostal">Numero de l'étage:</label>
-							<input #FloorNumber="ngModel" type="number" class="form-control required" id="adressePostal" required
-							[(ngModel)] = "newFloor.order_number" name="address" placeholder="ex: Edouard Belin,50b"/>
-						  
-							<p *ngIf="FloorNumber.control.hasError('required') && (FloorNumber.touched)"
-							class="alert alert-danger validation-message">Numero de l'étage requis</p>
-							
-						  </div><!--/input adresse -->
-						  
-						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
-						  <button id="send" type="submit" (click)="confirmAddNewFloor()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
-						</form>
-					</div><!-- form site-->	
-				<!--/fin CREATION NEW FLOOR-->	
-				
-						
-				<!--FORMUALIRE NEW SPACE-->
-					<div *ngIf="isANewSpace" >
-						<h1 [ngStyle]="{'color':'red'}" >Nouvelle Espace</h1>
-						
-						<form #form="ngForm" id="formulaire"  class="simple-form" >
-						  <div class="form-group">
-							<label for="nomEspace">Reference:</label>
-							<input #name="ngModel" type="text" class="form-control"  id="nomEspace"
-								[(ngModel)] = "newSpace.reference" 	name="nomEspace"	
-								required />
+							  </div> <!--/input Nom -->
+							  
+							  <div class="form-group">
+								<label for="adressePostal">Numero de l'étage:</label>
+								<input #FloorNumber="ngModel" type="number" class="form-control required" id="adressePostal" required
+								[(ngModel)] = "newFloor.order_number" name="address" placeholder="ex: Edouard Belin,50b"/>
+							  
+								<p *ngIf="FloorNumber.control.hasError('required') && (FloorNumber.touched)"
+								class="alert alert-danger validation-message">Numero de l'étage requis</p>
 								
-							<p *ngIf="name.control.hasError('required')&& (name.touched)"
-							class="alert alert-danger validation-message">Référence requise</p>
+							  </div><!--/input adresse -->
+							  
+							  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
+							  <button id="send" type="submit" (click)="confirmAddNewFloor()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+							</form>
+						</div><!-- form site-->	
+					<!--/fin CREATION NEW FLOOR-->	
+					
 							
-						  </div> <!--/input Nom -->
-						  
-						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}	</div>			  
-						  <button id="send" type="submit" (click)="confirmAddNewSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
-						</form>
-					</div><!-- form site-->	
-				<!--/fin CREATION NEW SPACE-->	
-			
-				
-				<!--FORMUALIRE NEW READER-->
-				<div *ngIf="isANewReader" >
-						<h1 [ngStyle]="{'color':'red'}" >Nouveau Reader </h1>
-						<form #form="ngForm" id="formulaire"  class="simple-form" >
-						
-						  <div class="form-group">
-							<label for="nomReader">Reference:</label>
-							<input #name="ngModel" type="text" class="form-control"  id="nomReader"
-								[(ngModel)] = "newReader.reference" 	name="nomReader"	
-								required />
-								
-							<p *ngIf="name.control.hasError('required')&& (name.touched)"
-							class="alert alert-danger validation-message">Référence requise</p>
+					<!--FORMUALIRE NEW SPACE-->
+						<div *ngIf="isANewSpace" >
+							<h1 [ngStyle]="{'color':'red'}" >Nouvelle Espace</h1>
 							
-						  </div> <!--/input Mac adresse -->
-						  
-						  <div class="form-group">
-							<label for="adresseMac">Mac address:</label>
-							<input #MacAddress="ngModel" type="text" class="form-control required" id="adresseMac" required
-							[(ngModel)] = "newReader.mac" name="adresseMac" />
-						  
-							<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
-							class="alert alert-danger validation-message"> Adresse Mac requise </p>
-							
-						  </div><!--/input Mac adresse -->
-						  
-						  <div class="form-group"> <!--input fixe -->
-							<label for="fixe">Reader fixe:
-							<input #Fixed="ngModel" type="checkbox" class="form-control required" id="fixe" 
-							[(ngModel)] = "newReader.fixed" name="fixe" /> </label>
-							<p  class="alert alert-info validation-message"> Cocher la case si votre reader est fixe</p>
-						  
-						  </div><!--/input fixe -->
-							
-							
-							<div class="form-group"><!--SELCET space -->
-							<label for="space">Space:</label>
-							<select  #MacAddress="ngModel" class="form-control"  id="space" name="space" [(ngModel)]="newReader.id_space" disabled="disabled">
-								<option *ngFor="let space of currentFloor.listSpaces; let i = index;"
-								[value]="space.id_space"  required> {{space.id_space }} - {{ space.reference }}</option>							
-							</select>
-							<!-- <input disabled="disabled" #MacAddress="ngModel"  class="form-control required" id="space" required
-							[(ngModel)] = "currentFloor.listSpaces[spaceIndex].listReaders[readerIndex].id_space" name="space" /> -->
-						  
-							<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
-							class="alert alert-danger validation-message"> Espace doit etre selectionne </p>
-							
-						  </div><!--/input space -->
-			
-						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
-						  <button id="send" type="submit" (click)="confirmAddNewReader()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
-						</form>
-					</div><!-- form site-->	
-				<!--/fin CREATION NEW READER-->	
-			
-			   <!--FORM MODIF SPACE-->
-					<div *ngIf="UpdateSpace" >
-						<h1 [ngStyle]="{'color':'red'}" >Modifier Espace</h1>
-						<div *ngIf="selectedSpace">
 							<form #form="ngForm" id="formulaire"  class="simple-form" >
 							  <div class="form-group">
 								<label for="nomEspace">Reference:</label>
 								<input #name="ngModel" type="text" class="form-control"  id="nomEspace"
-									[(ngModel)] = "spaceUpdate.reference" 	name="nomEspace"	
+									[(ngModel)] = "newSpace.reference" 	name="nomEspace"	
 									required />
 									
 								<p *ngIf="name.control.hasError('required')&& (name.touched)"
@@ -255,60 +142,76 @@
 							  </div> <!--/input Nom -->
 							  
 							  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}	</div>			  
-							  <button id="send" type="submit" (click)="confirmUpdateSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+							  <button id="send" type="submit" (click)="confirmAddNewSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
 							</form>
-						</div>
-					</div>
-			   
-			   <!--/FORM MODIF SPACE-->
-			
-			<!--FORMUALIRE UPDATE READER-->
-				<div *ngIf="UpdateReader" >
-						<h1 [ngStyle]="{'color':'red'}" >Update Reader </h1>
-						<form #form="ngForm" id="formulaire"  class="simple-form" >
-						
-						  <div class="form-group"> <!--input reference -->
-							<label for="nomReader">Reference:</label>
-							<input #name="ngModel" type="text" class="form-control"  id="nomReader"
-								[(ngModel)] = "readerUpdate.reference" 	name="nomReader"	
-								required />
-								
-							<p *ngIf="name.control.hasError('required')&& (name.touched)"
-							class="alert alert-danger validation-message">Référence requise</p>
-							
-						  </div> <!--/input reference -->
-						  
-						  <div class="form-group"><!--input space -->
-							<label for="space">Space:</label>
-							<select  #MacAddress="ngModel" class="form-control"  id="space" name="space" [(ngModel)]="readerUpdate.id_space" >
-								<option *ngFor="let space of currentFloor.listSpaces; let i = index;"
-								[value]="space.id_space" (click)="moveReader(i)" required> {{space.id_space }} - {{ space.reference }}</option>							
-							</select>
-							<!-- <input disabled="disabled" #MacAddress="ngModel"  class="form-control required" id="space" required
-							[(ngModel)] = "currentFloor.listSpaces[spaceIndex].listReaders[readerIndex].id_space" name="space" /> -->
-						  
-							<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
-							class="alert alert-danger validation-message"> Espace doit etre selectionne </p>
-							
-						  </div><!--/input space -->
-						  
-						  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
-						  <button id="send" type="submit" (click)="ConfirmUpdateReader()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
-						</form>
-					</div><!-- form site-->	
-				<!--/fin UPDATE  READER-->	
-			
-			
-				<div *ngIf= "basicView" class="panel-group" >				
-				  <h1>Espace selectionné</h1>
-					<div *ngIf= "currentFloor.listSpaces[selectedSpace]">
-					<h2>{{currentFloor.listSpaces[selectedSpace].reference}}</h2>
-					      <div> <!-- si clic alors fiche formaulire-->
+						</div><!-- form site-->	
+					<!--/fin CREATION NEW SPACE-->	
+				
+					
+					<!--FORMUALIRE NEW READER-->
+					<div *ngIf="isANewReader" >
+							<h1 [ngStyle]="{'color':'red'}" >Nouveau Reader </h1>
 							<form #form="ngForm" id="formulaire"  class="simple-form" >
+							
+							  <div class="form-group">
+								<label for="nomReader">Reference:</label>
+								<input #name="ngModel" type="text" class="form-control"  id="nomReader"
+									[(ngModel)] = "newReader.reference" 	name="nomReader"	
+									required />
+									
+								<p *ngIf="name.control.hasError('required')&& (name.touched)"
+								class="alert alert-danger validation-message">Référence requise</p>
+								
+							  </div> <!--/input Mac adresse -->
+							  
+							  <div class="form-group">
+								<label for="adresseMac">Mac address:</label>
+								<input #MacAddress="ngModel" type="text" class="form-control required" id="adresseMac" required
+								[(ngModel)] = "newReader.mac" name="adresseMac" />
+							  
+								<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
+								class="alert alert-danger validation-message"> Adresse Mac requise </p>
+								
+							  </div><!--/input Mac adresse -->
+							  
+							  <div class="form-group"> <!--input fixe -->
+								<label for="fixe">Reader fixe:
+								<input #Fixed="ngModel" type="checkbox" class="form-control required" id="fixe" 
+								[(ngModel)] = "newReader.fixed" name="fixe" /> </label>
+								<p  class="alert alert-info validation-message"> Cocher la case si votre reader est fixe</p>
+							  
+							  </div><!--/input fixe -->
+								
+								
+								<div class="form-group"><!--SELCET space -->
+								<label for="space">Space:</label>
+								<select  #MacAddress="ngModel" class="form-control"  id="space" name="space" [(ngModel)]="newReader.id_space" disabled="disabled">
+									<option *ngFor="let space of currentFloor.listSpaces; let i = index;"
+									[value]="space.id_space"  required> {{space.id_space }} - {{ space.reference }}</option>							
+								</select>
+								<!-- <input disabled="disabled" #MacAddress="ngModel"  class="form-control required" id="space" required
+								[(ngModel)] = "currentFloor.listSpaces[spaceIndex].listReaders[readerIndex].id_space" name="space" /> -->
+							  
+								<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
+								class="alert alert-danger validation-message"> Espace doit etre selectionne </p>
+								
+							  </div><!--/input space -->
+				
+							  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
+							  <button id="send" type="submit" (click)="confirmAddNewReader()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+							</form>
+						</div><!-- form site-->	
+					<!--/fin CREATION NEW READER-->	
+				
+				   <!--FORM MODIF SPACE-->
+						<div *ngIf="UpdateSpace" >
+							<h1 [ngStyle]="{'color':'red'}" >Modifier Espace</h1>
+							<div *ngIf="selectedSpace">
+								<form #form="ngForm" id="formulaire"  class="simple-form" >
 								  <div class="form-group">
 									<label for="nomEspace">Reference:</label>
 									<input #name="ngModel" type="text" class="form-control"  id="nomEspace"
-										[(ngModel)] = "currentFloor.listSpaces[selectedSpace].reference" 	name="nomEspace"	
+										[(ngModel)] = "spaceUpdate.reference" 	name="nomEspace"	
 										required />
 										
 									<p *ngIf="name.control.hasError('required')&& (name.touched)"
@@ -317,28 +220,90 @@
 								  </div> <!--/input Nom -->
 								  
 								  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}	</div>			  
-								  <button id="send" type="submit"   class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+								  <button id="send" type="submit" (click)="confirmUpdateSpace()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
 								</form>
 							</div>
-					 </div>
-					<!-- <table class= "table">
-						 <thead>
-							<tr>
-							  <th>Space : {{space.reference }}</th>							  
-							</tr>
-						  </thead>
-						  <tbody>
-							<tr>
-							  <th scope="row">1</th>
-							  <td>Mark</td>
-							  <td>Otto</td>
-							  <td>@mdo</td>
-							</tr>							
-						  </tbody>
-					</table> -->
-				 
-				</div>
-			</div>	
+						</div>
+				   
+				   <!--/FORM MODIF SPACE-->
+				
+				<!--FORMUALIRE UPDATE READER-->
+					<div *ngIf="UpdateReader" >
+							<h1 [ngStyle]="{'color':'red'}" >Update Reader </h1>
+							<form #form="ngForm" id="formulaire"  class="simple-form" >
+							
+							  <div class="form-group"> <!--input reference -->
+								<label for="nomReader">Reference:</label>
+								<input #name="ngModel" type="text" class="form-control"  id="nomReader"
+									[(ngModel)] = "readerUpdate.reference" 	name="nomReader"	
+									required />
+									
+								<p *ngIf="name.control.hasError('required')&& (name.touched)"
+								class="alert alert-danger validation-message">Référence requise</p>
+								
+							  </div> <!--/input reference -->
+							  
+							  <div class="form-group"><!--input space -->
+								<label for="space">Space:</label>
+								<select  #MacAddress="ngModel" class="form-control"  id="space" name="space" [(ngModel)]="readerUpdate.id_space" >
+									<option *ngFor="let space of currentFloor.listSpaces; let i = index;"
+									[value]="space.id_space" (click)="moveReader(i)" required> {{space.id_space }} - {{ space.reference }}</option>							
+								</select>
+								<!-- <input disabled="disabled" #MacAddress="ngModel"  class="form-control required" id="space" required
+								[(ngModel)] = "currentFloor.listSpaces[spaceIndex].listReaders[readerIndex].id_space" name="space" /> -->
+							  
+								<p *ngIf="MacAddress.control.hasError('required') && (MacAddress.touched)"
+								class="alert alert-danger validation-message"> Espace doit etre selectionne </p>
+								
+							  </div><!--/input space -->
+							  
+							  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}				  </div>			  
+							  <button id="send" type="submit" (click)="ConfirmUpdateReader()"  class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+							</form>
+						</div><!-- form site-->	
+					<!--/fin UPDATE  READER-->	
+				
+				
+					<div *ngIf= "basicView" class="panel-group" >				
+					  <h1>Espace selectionné</h1>
+						<div *ngIf= "currentFloor.listSpaces[selectedSpace]">
+						<h2>{{currentFloor.listSpaces[selectedSpace].reference}}</h2>
+							  <div> <!-- si clic alors fiche formaulire-->
+								<form #form="ngForm" id="formulaire"  class="simple-form" >
+									  <div class="form-group">
+										<label for="nomEspace">Reference:</label>
+										<input #name="ngModel" type="text" class="form-control"  id="nomEspace"
+											[(ngModel)] = "currentFloor.listSpaces[selectedSpace].reference" 	name="nomEspace"	
+											required />
+											
+										<p *ngIf="name.control.hasError('required')&& (name.touched)"
+										class="alert alert-danger validation-message">Référence requise</p>
+										
+									  </div> <!--/input Nom -->
+									  
+									  <div id="error" [ngStyle]="{'color':'red'}"> {{errorMessage}}	</div>			  
+									  <button id="send" type="submit"   class="btn btn-default" [disabled]="!form.form.valid" >Submit</button>
+									</form>
+								</div>
+						 </div>
+						<!-- <table class= "table">
+							 <thead>
+								<tr>
+								  <th>Space : {{space.reference }}</th>							  
+								</tr>
+							  </thead>
+							  <tbody>
+								<tr>
+								  <th scope="row">1</th>
+								  <td>Mark</td>
+								  <td>Otto</td>
+								  <td>@mdo</td>
+								</tr>							
+							  </tbody>
+						</table> -->
+					 
+					</div>
+				</div><!--/row-->	
 			</div>
 		
 		</div>
