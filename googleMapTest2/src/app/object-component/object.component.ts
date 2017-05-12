@@ -34,6 +34,7 @@ export class ObjectComponent implements OnInit {
     @Input()  updateObject : Object;
 	private selectedObject : any;
 	private lastSelected : number;
+	lastObjectSelected : any;
   
   
   //VARIABLES DE TRI     
@@ -133,18 +134,19 @@ export class ObjectComponent implements OnInit {
 	  
  }
  
-  selectingObject(i:number){
+  selectingObject(obj : any){
+	  //console.log(i);
 	  
-	  if(this.lastSelected == i){//si le nouveau selectionne == dernier selcetionne 
-		  this.lastSelected = null;
+	  if(this.lastObjectSelected == obj){//si le nouveau selectionne == dernier selcetionne 
+		  this.lastObjectSelected = null;
 		  this.selectedObject = null;
 	  }
 	  else
 	  {
-		  this.lastSelected = i;
-		  this.selectedObject = this.objects_listes[i];
-		  this.updateObject.reference = this.objects_listes[i].reference;	  
-		  this.updateObject.id_object = this.objects_listes[i].id_object;	
+		  this.lastObjectSelected = obj;
+		  this.selectedObject = obj;
+		  this.updateObject.reference = obj.reference;	  
+		  this.updateObject.id_object = obj.id_object;	
 	  }
   }
 

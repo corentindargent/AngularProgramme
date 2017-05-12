@@ -98,7 +98,7 @@
 						<div class="form-group"><!-- Champs reference -->
 							<label for="textbox">Reference</label>
 							<input #reference="ngModel"  type="text" class="form-control" id="textbox" name="textbox"
-								[(ngModel)]="newObject.reference" required>
+								[(ngModel)]="updateObject.reference" required>
 							<p *ngIf="reference.control.hasError('required')&& (reference.touched)"
 							class="alert alert-danger validation-message">Référence requise</p>
 						</div> <!-- /Champs reference -->       
@@ -106,7 +106,7 @@
 				</modal-body>
 				<modal-footer >
 					<button type="button" class="btn btn-default" data-dismiss="modalUpdate" (click)="modalUpdate.close()">Cancel</button>
-					<button type="button" class="btn btn-primary" [disabled]="!newObject.reference" (click)="confirmUpdateObjet()">Submit</button>
+					<button type="button" class="btn btn-primary" [disabled]="!updateObject.reference" (click)="confirmUpdateObjet()">Submit</button>
 				</modal-footer>
 			</modal>
 				
@@ -163,10 +163,10 @@
 					  </thead>
 					  <tbody><!-- sortType: sortReverse -->
 					  
-						<tr *ngFor="let object of objects_listes | orderBy: {property: column, direction: direction} | category: searchText; let i = index">
+						<tr *ngFor="let object of objects_listes | category: searchText | orderBy: {property: column, direction: direction} ; let i = index">
 						  <td scope="row">{{i+1}}</td>
 						  <td><a [routerLink]="['/object/details',object.id_object]">{{object.id_object}}</a></td>
-						  <td ><p [class.selectObject]="selectedObject == object"  (click)="selectingObject(i);" style="cursor: pointer; cursor: hand;">{{object.reference}}</p></td>						 
+						  <td ><p [class.selectObject]="selectedObject == object"  (click)="selectingObject(object);" style="cursor: pointer; cursor: hand;">{{object.reference}}</p></td>						 
 						  <td>{{object.date_detection}}</td>
 						  <td>{{object.spaceRef}}</td>
 						  <td>{{object.floorRef}}</td>						  
@@ -192,7 +192,7 @@
 			<div class='row'>			
 				<div class="col-lg-12 text-center pb-5">
 					<button *ngIf="!siteId" class="btn btn-primary btn-rond" id="confirmBtn" (click)="modal.open();" > Creer nouvel objet </button>
-					<button class="btn btn-primary btn-rond " [disabled]="!selectedObject" (click)="modalUpdate.open()" >Modifier Reference Objet</button>					
+					<button class="btn btn-primary btn-rond " [disabled]="!selectedObject || searchText" (click)="modalUpdate.open()" >Modifier Reference Objet</button>					
 				</div><!-- /button_footer-->			
 			</div><!-- /row-->	
 			
