@@ -53,6 +53,13 @@ export class ObjectComponent implements OnInit {
 			{spaceId:1,reference:"Cartable",id_object:11},
 			{spaceId:2,reference:"Bonbon",id_object:11}];
    */
+   
+   
+   //var test
+   searchText : string;
+   searchBy : any = "reference";
+   
+
 
   constructor(private route : ActivatedRoute, private siteService: SiteService, private objectService : ObjetService) { }
 

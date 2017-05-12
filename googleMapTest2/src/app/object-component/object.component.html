@@ -111,6 +111,14 @@
 			</modal>
 				
 				<div class="col-lg-offset-1 col-lg-10 col-lg-offset-1"> <!-- tab de données-->
+				
+						<div class="row form-group">
+							<div class="form-group col-md-6">							  
+								<input type="text" [(ngModel)]="searchText" 
+									   class="form-control" placeholder="Search By Space" />
+							</div>
+						</div>
+							
 					<table class="table table-bordered">
 					  <thead class="thead-default">
 						<tr>					
@@ -155,7 +163,7 @@
 					  </thead>
 					  <tbody><!-- sortType: sortReverse -->
 					  
-						<tr *ngFor="let object of objects_listes | orderBy: {property: column, direction: direction} ; let i = index">
+						<tr *ngFor="let object of objects_listes | orderBy: {property: column, direction: direction} | category: searchText; let i = index">
 						  <td scope="row">{{i+1}}</td>
 						  <td><a [routerLink]="['/object/details',object.id_object]">{{object.id_object}}</a></td>
 						  <td ><p [class.selectObject]="selectedObject == object"  (click)="selectingObject(i);" style="cursor: pointer; cursor: hand;">{{object.reference}}</p></td>						 

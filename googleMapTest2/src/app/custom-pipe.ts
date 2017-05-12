@@ -40,3 +40,17 @@ export class OrderByPipe implements PipeTransform {
 }
 
 
+@Pipe({ name: 'category' })
+export class CategoryPipe implements PipeTransform {
+  transform(categories: any, searchText: any): any {
+	  
+	  
+    if(searchText == null) return categories;
+
+    return categories.filter(function(category){
+      return category.spaceRef.toLowerCase().indexOf(searchText.toLowerCase()) > -1;
+    })
+  }
+}
+
+

@@ -27,11 +27,11 @@ import {ReaderService} from './reader.service';
 import {ObjetService} from'./objet.service';
 import {TagService} from'./tag.service';
 
-import {OrderByPipe} from './custom-pipe';
+import {OrderByPipe,CategoryPipe} from './custom-pipe';
 
 @NgModule({
   declarations: [
-    AppComponent,GoogleMapComponentComponent, NewShapesComponent, BuildingComponent, RootComponent, ObjectComponent, ObjectDetailComponent, TagComponent,OrderByPipe
+    AppComponent,GoogleMapComponentComponent, NewShapesComponent, BuildingComponent, RootComponent, ObjectComponent, ObjectDetailComponent, TagComponent,OrderByPipe,CategoryPipe
   ],
   imports: [
     BrowserModule,
