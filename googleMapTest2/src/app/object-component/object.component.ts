@@ -58,7 +58,7 @@ export class ObjectComponent implements OnInit {
    
    //var test
    searchText : string;
-   searchBy : any = "reference";
+   searchBy : any = "Reference";
    
 
 

@@ -98,47 +98,49 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		if(this.gmapService.loadEnd && this.polygonNonAffiche)
 		{
 			if(this.sites_list)
-			{	
-				this.map = this.gmapService.map;
+			{	console.log("creation polygon google map");
+				this.map = this.gmapService.map;// conserve trace de la map ; pour pouvoir set visible ou non les polygons sur celle-ci
+				
 		        /*PEUT PAS UTILISER DIRECTEMENT LES VARIABLES DEFINIES DANS ANGULAR DOIT PASSER PAR DES ARRAY INTERMETIAIRE*/
-				var tabPolygonSite = new Array(); 
+				///var tabPolygonSite = new Array(); 
 				var tabPolygonBuilding = new Array(); 
 				var buildingList = new Array();
+				var tabAllPolygon = new Array(); 
 				
+				var tab = new Array();;
+				console.log(this.sites_list.length);
 				for(let i = 0; i < this.sites_list.length ;i++)
 				{
-					tabPolygonBuilding = new Array();
+					tab = new Array();
 					var site = new google.maps.Polygon(NewShapesComponent.listOptionsPolygonsSite);		
 					var path  = this.sites_list[i].polygon;
 					site.setPath(path); 										
-					tabPolygonSite.push(site);
+					//tabPolygonSite.push(site);
 					
 					if(this.sites_list[i].listBuidling[0])//si site possede un building
-					{
-						
-						for(let index = 0 ; index < this.sites_list[i].listBuidling.length ; index++)
+					{						
+						for(let index = 0 ; index < this.sites_list[i].listBuidling.length ; index++)/*boucle sur les batiments d'un site*/
 						{
-							var batiment = new google.maps.Polygon(NewShapesComponent.listOptionsPolygonsBuilding);		
-							var path  = this.sites_list[i].listBuidling[index].polygon;
-							batiment.setPath(path); 							
-							tabPolygonBuilding.push(batiment);
-							
-							buildingList.push(this.sites_list[i].listBuidling[index]);
-							console.log(this.sites_list[i].listBuidling[index]);
-						}	
-						this.listePolygonBatiment = tabPolygonBuilding;		
-					
+							//Creation polygons google map des batiments
+								var batiment = new google.maps.Polygon(NewShapesComponent.listOptionsPolygonsBuilding);		
+								var path  = this.sites_list[i].listBuidling[index].polygon;
+								batiment.setPath(path); 							
+								tabPolygonBuilding.push(batiment);//tab reprenant les polygons d'un batiment
+							    tab.push(batiment);
+								 
+							   buildingList.push(this.sites_list[i].listBuidling[index]);//tab reprenant les informations d'un batiment					
+						}					
 					}
-				
-					//Array de tous polygons : par ligne on a polygon du site et les polygons des batimenst du site
-					//this.listOfAllPolygon.push({"site" : site,"listBuilding":tabPolygonBuilding});
 					
-					
+					tabAllPolygon.push({"site" : site,"listBuilding":tab});							
 				}
 				
-				this.building_list = buildingList;
-				this.listePolygonSite = tabPolygonSite;
+				this.listOfAllPolygon = tabAllPolygon;
+				this.listePolygonBatiment = tabPolygonBuilding;
+				this.building_list = buildingList; // tab reprennat les infos/attributs des batiments 
+				//this.listePolygonSite = tabPolygonSite; // tab comprenant les polygons google maps
 				this.polygonNonAffiche = false;
+				
 			}
 		}
 	}
@@ -151,11 +153,19 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 	
 	
 	resetHTML(){
-		this.lastSelected = null; //reset à null
-		if(this.isNewSite || this.isNewBuilding ){
+		if(this.isNewSite){
 			this.isNewSite=false;
+			this.removeDrawingManager();			
+		}
+		
+		if(this.isNewBuilding){
 			this.isNewBuilding=false;
 			this.removeDrawingManager();
+			
+			if(this.lastSelected)//si il ya eu 1 site choisi
+			{
+				this.resetLastSiteSelected();
+			}
 		}
 		
 		if(this.modifSite){
@@ -164,10 +174,11 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		}
 		
 		if(this.modifBuilding){
+			this.resetLastBuildingSelected();
 			this.modifBuilding=false;
-			/* REST DERNIER SITE SELECTIONNE (COULEUR)*/
-		    this.listePolygonBatiment[this.lastSelected].setOptions({fillColor: '#0073F7'});
 		}
+		
+		this.lastSelected = null; //reset la var contenat le dernie polygon selcetionne à null
 	}
 	
 	addPolygons(bool: boolean){//init processus creation site/batiment		
@@ -311,28 +322,39 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		this.lastSelected = 0;//par defaut sera le premier site
 	
 		this.setNewSiteSelected();	
-		this.listePolygonSite[this.lastSelected].setOptions({editable:true});		
+		this.listOfAllPolygon[this.lastSelected].site.setOptions({editable:true});		
 	}	
 	
 	
 	resetLastSiteSelected(){
-		this.listePolygonSite[this.lastSelected].setOptions({fillColor: '#00DE43'});
-		this.listePolygonSite[this.lastSelected].setOptions({editable:false });	
+		this.listOfAllPolygon[this.lastSelected].site.setOptions({fillColor: '#00DE43'});
+		this.listOfAllPolygon[this.lastSelected].site.setOptions({editable:false });	
 		
 		var path = this.sites_list[this.lastSelected].polygon;
-		this.listePolygonSite[this.lastSelected].setPath(path);		
-		this.listePolygonSite[this.lastSelected].setMap(null);
+		this.listOfAllPolygon[this.lastSelected].site.setPath(path);		
+		this.listOfAllPolygon[this.lastSelected].site.setMap(null);
 		
-	
+		if(this.listOfAllPolygon[this.lastSelected].listBuilding[0])//signifie qu'il a des fils a cacher
+		{
+			this.listOfAllPolygon[this.lastSelected].listBuilding.forEach(function(element,index){
+				
+				element.setMap(null);
+			})				
+		}
 		
 	}
 	
-	setNewSiteSelected(){		
-		this.listePolygonSite[this.lastSelected].setMap(this.map);
-		this.listePolygonSite[this.lastSelected].setOptions({fillColor:"#EEFE0B"});//set sa couleur
-		this.map.setCenter(this.listePolygonSite[this.lastSelected].getPath().getAt(0));//centre la map dessus
+	setNewSiteSelected(){
+		var self = this; //conserve ctxt angular pour acceder var map		
+		this.listOfAllPolygon[this.lastSelected].site.setMap(this.map);
+		this.listOfAllPolygon[this.lastSelected].site.setOptions({fillColor:"#EEFE0B"});//set sa couleur
+		this.map.setCenter(this.listOfAllPolygon[this.lastSelected].site.getPath().getAt(0));//centre la map dessus
 		this.map.setZoom(17);
 		
+		this.listOfAllPolygon[this.lastSelected].listBuilding.forEach(function(element,index)//rend visible les batiments du sites selectionne
+		{					
+				element.setMap(self.map);
+		})	
 		
 		
 		//garnit variable de modif
@@ -351,13 +373,13 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		/* NOUVEAU SELECTIONNE */
         this.lastSelected = index;
 		this.setNewSiteSelected();	
-		this.listePolygonSite[this.lastSelected].setOptions({editable:true});
+		this.listOfAllPolygon[this.lastSelected].site.setOptions({editable:true});
 	}
 	
 	
 	confirmUpdateSite(){
 		
-		this.siteUpdate.polygon = this.listePolygonSite[this.lastSelected].getPath().getArray();
+		this.siteUpdate.polygon = this.listOfAllPolygon[this.lastSelected].site.getPath().getArray();
 		console.log(this.siteUpdate);
 		this.siteService.updateSite(this.siteUpdate).subscribe(
 						site => {console.log('create result received:'+site);},
@@ -390,13 +412,18 @@ export class NewShapesComponent implements OnInit,AfterContentChecked{
 		this.buildUpdate.site_id = this.building_list[this.lastSelected].site_id;
 		this.buildUpdate.building_id = this.building_list[this.lastSelected].building_id;
 	}
+	
+	resetLastBuildingSelected(){
+		this.listePolygonBatiment[this.lastSelected].setOptions({fillColor: '#0073F7'});
+		this.listePolygonBatiment[this.lastSelected].setMap(null);	
+	}
 		
 	onSelectBuilding(index : number){
 		
 		if(this.lastSelected == index){return;}	
 		
-		/* REST DERNIER SITE SELECTIONNE (COULEUR)*/
-		this.listePolygonBatiment[this.lastSelected].setOptions({fillColor: '#0073F7'});
+		/* REST DERNIER SITE SELECTIONNE (COULEUR) et visibilte*/
+		this.resetLastBuildingSelected();
 				
 		/* NOUVEAU SELECTIONNE */		
         this.lastSelected = index;

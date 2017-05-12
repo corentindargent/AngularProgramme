@@ -39,8 +39,8 @@ export class OrderByPipe implements PipeTransform {
     };
 }
 
-
-@Pipe({ name: 'category' })
+//version recherche sous colonne predefinies
+/* @Pipe({ name: 'category' })
 export class CategoryPipe implements PipeTransform {
   transform(categories: any, searchText: any): any {
 	  
@@ -49,6 +49,29 @@ export class CategoryPipe implements PipeTransform {
 
     return categories.filter(function(category){
       return category.spaceRef.toLowerCase().indexOf(searchText.toLowerCase()) > -1;
+    })
+  } 
+}*/
+
+//version filtrage selon colonne envoyée en args
+@Pipe({ name: 'category' })
+export class CategoryPipe implements PipeTransform {
+  transform(categories: any, args?: any): any {
+	  
+	  
+    if(args.search == null) return categories;
+
+    return categories.filter(function(category){
+		switch(args.categorie)
+		{
+			case "Reference" :
+				return category.reference.toLowerCase().indexOf(args.search.toLowerCase()) > -1;
+				
+			case "Espace" :
+			    return category.spaceRef.toLowerCase().indexOf(args.search.toLowerCase()) > -1;
+
+			
+		}
     })
   }
 }

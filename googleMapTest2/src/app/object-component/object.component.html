@@ -115,7 +115,13 @@
 						<div class="row form-group">
 							<div class="form-group col-md-6">							  
 								<input type="text" [(ngModel)]="searchText" 
-									   class="form-control" placeholder="Search By Space" />
+									   class="form-control" placeholder="Search By {{searchBy}}" />
+							</div>
+							<div class="form-group col-md-2">
+							  <select #selectSite="ngModel" class="form-control"[(ngModel)]="searchBy" name="search">
+								<option  [value]="'Reference'"> Reference </option>
+								<option   [value]="'Espace'"> Piece </option>
+							  </select>
 							</div>
 						</div>
 							
@@ -163,7 +169,7 @@
 					  </thead>
 					  <tbody><!-- sortType: sortReverse -->
 					  
-						<tr *ngFor="let object of objects_listes | category: searchText | orderBy: {property: column, direction: direction} ; let i = index">
+						<tr *ngFor="let object of objects_listes | category: {search :searchText, categorie:searchBy} | orderBy: {property: column, direction: direction}  ; let i = index">
 						  <td scope="row">{{i+1}}</td>
 						  <td><a [routerLink]="['/object/details',object.id_object]">{{object.id_object}}</a></td>
 						  <td ><p [class.selectObject]="selectedObject == object"  (click)="selectingObject(object);" style="cursor: pointer; cursor: hand;">{{object.reference}}</p></td>						 
